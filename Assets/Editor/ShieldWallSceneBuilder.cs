@@ -479,8 +479,8 @@ namespace ShieldWall.Editor
             
             Rigidbody rb = headObj.AddComponent<Rigidbody>();
             rb.mass = 2f;
-            rb.drag = 0.5f;
-            rb.angularDrag = 0.5f;
+            rb.linearDamping = 0.5f;
+            rb.angularDamping = 0.5f;
             
             headObj.AddComponent<SeveredLimb>();
             
@@ -506,8 +506,8 @@ namespace ShieldWall.Editor
             
             Rigidbody rb = armObj.AddComponent<Rigidbody>();
             rb.mass = 1f;
-            rb.drag = 0.5f;
-            rb.angularDrag = 0.5f;
+            rb.linearDamping = 0.5f;
+            rb.angularDamping = 0.5f;
             
             armObj.AddComponent<SeveredLimb>();
             
@@ -533,8 +533,8 @@ namespace ShieldWall.Editor
             
             Rigidbody rb = legObj.AddComponent<Rigidbody>();
             rb.mass = 3f;
-            rb.drag = 0.5f;
-            rb.angularDrag = 0.5f;
+            rb.linearDamping = 0.5f;
+            rb.angularDamping = 0.5f;
             
             legObj.AddComponent<SeveredLimb>();
             

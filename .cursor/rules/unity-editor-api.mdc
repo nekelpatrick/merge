@@ -1,0 +1,43 @@
+# Unity Editor Script API - Avoid Deprecated Patterns
+
+## Quick Rules for Editor Scripts
+
+### 1. Object Destruction in Editor
+**DON'T:**
+```csharp
+Object.DestroyImmediate(gameObject);  // ❌ Explicit Object. prefix
+```
+
+**DO:**
+```csharp
+DestroyImmediate(gameObject);  // ✅ Direct method call
+```
+
+### 2. Finding Objects in Editor
+**DON'T:**
+```csharp
+Object.FindFirstObjectByType<T>();  // ❌ May be deprecated
+FindObjectOfType<T>();              // ❌ Old API
+```
+
+**DO:**
+```csharp
+FindAnyObjectByType<T>();  // ✅ Unity 2023+ API
+// OR
+UnityEngine.Object.FindAnyObjectByType<T>();  // ✅ Explicit namespace
+```
+
+### 3. Unity Editor Namespace
+When writing editor scripts:
+- Import `UnityEditor` explicitly
+- Use direct Unity method calls without `Object.` prefix for common operations
+- Check Unity version-specific APIs in documentation
+
+### Why This Matters
+- Unity APIs evolve between versions
+- Explicit `Object.` prefix may reference deprecated code paths
+- Editor scripts have different API conventions than runtime scripts
+
+---
+
+**Rule of thumb:** In editor scripts, use Unity methods directly. Let the compiler resolve to the correct API.
