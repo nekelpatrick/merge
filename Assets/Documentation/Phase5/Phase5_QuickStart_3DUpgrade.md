@@ -4,15 +4,15 @@
 
 ### Step 1: Generate Assets (1-Click)
 ```
-Unity Editor → Shield Wall → One-Click Setup All Assets
+Unity Editor → Shield Wall Builder → 3D Assets → Create All 3D Assets (One-Click)
 ```
 This creates all prefabs, materials, and environment props automatically.
 
 ### Step 2: Validate Installation
 ```
-Unity Editor → Shield Wall → Validate Visual System
+Unity Editor → Shield Wall Builder → Validation → Validate Visual System
 ```
-Check the validation window for any missing assets.
+Check the console output for any missing assets.
 
 ### Step 3: Test in Battle Scene
 1. Open `Assets/Scenes/Battle.unity`

@@ -88,11 +88,12 @@ Created primitive environment assets:
 Created Unity menu tools for rapid asset creation:
 
 **Menu Items:**
-- `Shield Wall > Create Primitive Limb Prefabs` - Generate gore prefabs
-- `Shield Wall > Create Toon Materials` - Generate all character materials
-- `Shield Wall > Create Environment Props` - Generate scene props
-- `Shield Wall > Create Blood Decal Prefabs` - Generate VFX assets
-- `Shield Wall > Validate Visual System` - Test all systems
+- `Shield Wall Builder > 3D Assets > Create All 3D Assets (One-Click)` - Master generator
+- `Shield Wall Builder > 3D Assets > Create Primitive Limb Prefabs` - Generate gore prefabs
+- `Shield Wall Builder > 3D Assets > Create Toon Materials` - Generate all character materials
+- `Shield Wall Builder > 3D Assets > Create Environment Props` - Generate scene props
+- `Shield Wall Builder > 3D Assets > Create Blood VFX` - Generate VFX assets
+- `Shield Wall Builder > Validation > Validate Visual System` - Test all systems
 
 ### 7. Visual Controller Integration
 Updated existing controllers for dismemberment:
@@ -133,17 +134,21 @@ Updated existing controllers for dismemberment:
 
 **1. Generate Required Assets:**
 ```
-Unity Menu → Shield Wall → Create Primitive Limb Prefabs
-Unity Menu → Shield Wall → Create Toon Materials
-Unity Menu → Shield Wall → Create Blood Decal Prefabs
-Unity Menu → Shield Wall → Create Environment Props
+Unity Menu → Shield Wall Builder → 3D Assets → Create All 3D Assets (One-Click)
+```
+Or generate individually:
+```
+Unity Menu → Shield Wall Builder → 3D Assets → Create Primitive Limb Prefabs
+Unity Menu → Shield Wall Builder → 3D Assets → Create Toon Materials
+Unity Menu → Shield Wall Builder → 3D Assets → Create Blood VFX
+Unity Menu → Shield Wall Builder → 3D Assets → Create Environment Props
 ```
 
 **2. Validate Installation:**
 ```
-Unity Menu → Shield Wall → Validate Visual System
+Unity Menu → Shield Wall Builder → Validation → Validate Visual System
 ```
-Check console for PASS/FAIL/WARN status of all assets.
+Check console output for PASS/FAIL/WARN status of all assets.
 
 **3. Using Modular Characters:**
 ```csharp

@@ -1,0 +1,144 @@
+# Editor Tools - Single Source of Truth
+
+## ALWAYS Use ShieldWallSceneBuilder.cs
+
+**Rule:** ALL Unity Editor tools MUST be added to `Assets/Editor/ShieldWallSceneBuilder.cs`
+
+### Why
+
+- Single source of truth for editor functionality
+- Consistent menu structure under "Shield Wall Builder/"
+- Easy to find and maintain all tools in one place
+- Prevents fragmentation across multiple scripts
+- Reduces file clutter in Assets/Editor/
+
+### When Adding Editor Tools
+
+**DO:**
+- Add methods to `ShieldWallSceneBuilder.cs`
+- Use menu path: `"Shield Wall Builder/Category/Action"`
+- Follow existing section structure (`#region` / `#endregion`)
+- Group related functionality together
+- Make helper methods `private static`
+- Document complex operations with comments
+
+**DON'T:**
+- Create new standalone editor scripts
+- Use different menu paths (keep everything under "Shield Wall Builder/")
+- Duplicate functionality that already exists
+- Create EditorWindow classes unless absolutely necessary
+- Add public methods that aren't menu items
+
+### Menu Structure
+
+```
+Shield Wall Builder/
+├── Complete Setup/           (One-click full scene builds)
+├── Asset Creation/           (Game data: Runes, Brothers, Enemies, etc.)
+├── 3D Assets/               (3D models, materials, prefabs, VFX)
+│   ├── Create All 3D Assets (One-Click)
+│   ├── Create Primitive Limb Prefabs
+│   ├── Create Toon Materials
+│   ├── Create Environment Props
+│   └── Create Blood VFX
+├── Battle Scene Setup/       (Scene construction tools)
+├── MainMenu Scene Setup/     (Menu scene tools)
+├── Validation/              (System integrity checks)
+│   └── Validate Visual System
+└── Debug/                   (Development helpers)
+```
+
+### Exception Cases
+
+**Only create separate editor scripts for:**
+
+1. **Complex Editor Windows** (`EditorWindow` class)
+   - Example: Custom asset browser, scene analyzer
+   - Requires persistent state and complex UI
+
+2. **Inspector Customization** (`CustomEditor`, `PropertyDrawer`)
+   - Example: Custom inspector for ScriptableObjects
+   - Specific to a single type
+
+3. **Asset Processors** (`AssetPostprocessor`)
+   - Example: Automatic import settings
+   - Triggered by Unity import pipeline
+
+**All other editor functionality belongs in ShieldWallSceneBuilder.**
+
+### Enforcement
+
+Before creating ANY new editor script, ask yourself:
+
+1. Can this be a menu item method in ShieldWallSceneBuilder? ✅ (99% of cases)
+2. Does this require a persistent EditorWindow? ❌ (rare)
+3. Is this an inspector customization? ❌ (specific case)
+4. Is this an asset processor? ❌ (import pipeline only)
+
+**If unsure, default to adding it to ShieldWallSceneBuilder.**
+
+### Code Organization in ShieldWallSceneBuilder
+
+Each functional area should have:
+
+1. **Public menu items** - Methods with `[MenuItem("Shield Wall Builder/...")]`
+2. **Helper region** - Private static methods that support the menu items
+3. **Clear naming** - Descriptive method names that indicate purpose
+
+Example pattern:
+
+```csharp
+#region My Feature
+
+[MenuItem("Shield Wall Builder/Category/Create Something", false, 200)]
+public static void CreateSomething()
+{
+    // Menu-accessible method
+    HelperMethod();
+    AnotherHelper();
+}
+
+#endregion
+
+#region My Feature Helpers
+
+private static void HelperMethod()
+{
+    // Implementation detail
+}
+
+private static void AnotherHelper()
+{
+    // Implementation detail
+}
+
+#endregion
+```
+
+### Historical Context
+
+Previously, we mistakenly created 6 separate editor scripts:
+- ❌ `OneClickSetup.cs`
+- ❌ `PrimitivePrefabCreator.cs`
+- ❌ `MaterialCreator.cs`
+- ❌ `EnvironmentPropCreator.cs`
+- ❌ `BloodDecalCreator.cs`
+- ❌ `VisualSystemValidator.cs`
+
+These have been **consolidated into ShieldWallSceneBuilder.cs** to maintain the single source of truth pattern.
+
+**Don't repeat this mistake.**
+
+### Benefits of This Approach
+
+✅ **Discoverability** - All tools in one menu hierarchy  
+✅ **Maintainability** - Single file to update and review  
+✅ **Consistency** - Uniform naming and organization  
+✅ **Performance** - Fewer scripts to compile  
+✅ **Clarity** - No confusion about where to add new tools  
+
+---
+
+**Remember: If you're creating a new `.cs` file in `Assets/Editor/`, you're probably doing it wrong.**
+
+Add it to `ShieldWallSceneBuilder.cs` instead.

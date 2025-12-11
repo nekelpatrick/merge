@@ -307,6 +307,595 @@ namespace ShieldWall.Editor
 
         #endregion
 
+        #region 3D Model Assets
+
+        [MenuItem("Shield Wall Builder/3D Assets/Create All 3D Assets (One-Click)", false, 200)]
+        public static void SetupAll3DAssets()
+        {
+            if (!EditorUtility.DisplayDialog(
+                "One-Click 3D Setup",
+                "This will create all prefabs, materials, and environment props.\n\nContinue?",
+                "Yes",
+                "Cancel"))
+            {
+                return;
+            }
+            
+            Debug.Log("=== Starting One-Click 3D Setup ===");
+            
+            EnsureModularFoldersExist();
+            
+            Debug.Log("Step 1/4: Creating materials...");
+            CreateToonMaterials();
+            
+            Debug.Log("Step 2/4: Creating limb prefabs...");
+            CreateLimbPrefabs();
+            
+            Debug.Log("Step 3/4: Creating blood VFX...");
+            CreateBloodDecals();
+            
+            Debug.Log("Step 4/4: Creating environment props...");
+            CreateEnvironmentProps();
+            
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
+            Debug.Log("=== One-Click 3D Setup Complete! ===");
+            Debug.Log("Use 'Shield Wall Builder/Validation/Validate Visual System' to verify all assets.");
+            
+            EditorUtility.DisplayDialog(
+                "Setup Complete",
+                "All 3D assets have been created successfully!\n\nNext steps:\n" +
+                "1. Run 'Shield Wall Builder/Validation/Validate Visual System'\n" +
+                "2. Check Assets/Documentation/Phase5/Phase5_3DModelUpgrade_Complete.md\n" +
+                "3. Assign prefab references in Battle scene",
+                "OK");
+        }
+
+        [MenuItem("Shield Wall Builder/3D Assets/Create Primitive Limb Prefabs", false, 201)]
+        public static void CreateLimbPrefabs()
+        {
+            string prefabPath = "Assets/Prefabs/Gore/";
+            
+            if (!AssetDatabase.IsValidFolder(prefabPath.TrimEnd('/')))
+            {
+                Debug.LogError($"Folder {prefabPath} does not exist!");
+                return;
+            }
+            
+            CreateSeveredHeadPrefab(prefabPath);
+            CreateSeveredArmPrefab(prefabPath);
+            CreateSeveredLegPrefab(prefabPath);
+            
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
+            Debug.Log("Successfully created primitive limb prefabs in " + prefabPath);
+        }
+
+        [MenuItem("Shield Wall Builder/3D Assets/Create Toon Materials", false, 202)]
+        public static void CreateToonMaterials()
+        {
+            string materialPath = "Assets/Art/Materials/Characters/";
+            
+            if (!AssetDatabase.IsValidFolder(materialPath.TrimEnd('/')))
+            {
+                Debug.LogError($"Folder {materialPath} does not exist!");
+                return;
+            }
+            
+            CreateMaterial(materialPath, "M_Character_Player", new Color(0.42f, 0.31f, 0.24f));
+            CreateMaterial(materialPath, "M_Character_Brother", new Color(0.3f, 0.3f, 0.4f));
+            CreateMaterial(materialPath, "M_Character_Thrall", new Color(0.42f, 0.27f, 0.14f));
+            CreateMaterial(materialPath, "M_Character_Warrior", new Color(0.35f, 0.35f, 0.35f));
+            CreateMaterial(materialPath, "M_Character_Berserker", new Color(0.55f, 0.13f, 0.13f));
+            CreateMaterial(materialPath, "M_Character_Archer", new Color(0.18f, 0.35f, 0.15f));
+            CreateMaterial(materialPath, "M_Blood", new Color(0.55f, 0.13f, 0.13f));
+            CreateMaterial(materialPath, "M_Gore", new Color(0.4f, 0.1f, 0.1f));
+            
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
+            Debug.Log($"Successfully created toon materials in {materialPath}");
+        }
+
+        [MenuItem("Shield Wall Builder/3D Assets/Create Environment Props", false, 203)]
+        public static void CreateEnvironmentProps()
+        {
+            string propPath = "Assets/Art/Models/Environment/";
+            string prefabPath = "Assets/Prefabs/Environment/";
+            
+            if (!AssetDatabase.IsValidFolder(propPath.TrimEnd('/')))
+            {
+                AssetDatabase.CreateFolder("Assets/Art/Models", "Environment");
+            }
+            
+            if (!AssetDatabase.IsValidFolder("Assets/Prefabs/Environment"))
+            {
+                AssetDatabase.CreateFolder("Assets/Prefabs", "Environment");
+            }
+            
+            CreateGroundPlane(prefabPath);
+            CreateStake(prefabPath);
+            CreateRock(prefabPath);
+            CreateDebris(prefabPath);
+            
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
+            Debug.Log("Successfully created environment props!");
+        }
+
+        [MenuItem("Shield Wall Builder/3D Assets/Create Blood VFX", false, 204)]
+        public static void CreateBloodDecals()
+        {
+            string prefabPath = "Assets/Prefabs/VFX/";
+            
+            if (!AssetDatabase.IsValidFolder(prefabPath.TrimEnd('/')))
+            {
+                Debug.LogError($"Folder {prefabPath} does not exist!");
+                return;
+            }
+            
+            CreateBloodDecalVariant(prefabPath, "BloodDecal_01", 0);
+            CreateBloodDecalVariant(prefabPath, "BloodDecal_02", 1);
+            CreateBloodDecalVariant(prefabPath, "BloodDecal_03", 2);
+            
+            CreateBloodBurstPrefab(prefabPath);
+            
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
+            Debug.Log($"Successfully created blood VFX prefabs in {prefabPath}");
+        }
+
+        #endregion
+
+        #region 3D Model Asset Helpers
+
+        private static void EnsureModularFoldersExist()
+        {
+            EnsureDirectoryExists("Assets/Prefabs/Characters");
+            EnsureDirectoryExists("Assets/Prefabs/Gore");
+            EnsureDirectoryExists("Assets/Prefabs/VFX");
+            EnsureDirectoryExists("Assets/Prefabs/Environment");
+            EnsureDirectoryExists("Assets/Art/Materials/Characters");
+            EnsureDirectoryExists("Assets/Art/Materials/Environment");
+            EnsureDirectoryExists("Assets/Art/Materials/Effects");
+        }
+
+        private static void CreateSeveredHeadPrefab(string path)
+        {
+            GameObject headObj = new GameObject("SeveredHead");
+            
+            MeshFilter meshFilter = headObj.AddComponent<MeshFilter>();
+            meshFilter.sharedMesh = PrimitiveMeshGenerator.CreateCubeMesh(0.4f);
+            
+            MeshRenderer renderer = headObj.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial = CreateDefaultLimbMaterial();
+            
+            BoxCollider collider = headObj.AddComponent<BoxCollider>();
+            collider.size = Vector3.one * 0.4f;
+            
+            Rigidbody rb = headObj.AddComponent<Rigidbody>();
+            rb.mass = 2f;
+            rb.drag = 0.5f;
+            rb.angularDrag = 0.5f;
+            
+            headObj.AddComponent<SeveredLimb>();
+            
+            string prefabPath = path + "SeveredHead.prefab";
+            PrefabUtility.SaveAsPrefabAsset(headObj, prefabPath);
+            Object.DestroyImmediate(headObj);
+        }
+
+        private static void CreateSeveredArmPrefab(string path)
+        {
+            GameObject armObj = new GameObject("SeveredArm");
+            
+            MeshFilter meshFilter = armObj.AddComponent<MeshFilter>();
+            meshFilter.sharedMesh = PrimitiveMeshGenerator.CreateCapsuleMesh(0.6f, 0.08f);
+            
+            MeshRenderer renderer = armObj.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial = CreateDefaultLimbMaterial();
+            
+            CapsuleCollider collider = armObj.AddComponent<CapsuleCollider>();
+            collider.height = 0.6f;
+            collider.radius = 0.08f;
+            collider.direction = 1;
+            
+            Rigidbody rb = armObj.AddComponent<Rigidbody>();
+            rb.mass = 1f;
+            rb.drag = 0.5f;
+            rb.angularDrag = 0.5f;
+            
+            armObj.AddComponent<SeveredLimb>();
+            
+            string prefabPath = path + "SeveredArm.prefab";
+            PrefabUtility.SaveAsPrefabAsset(armObj, prefabPath);
+            Object.DestroyImmediate(armObj);
+        }
+
+        private static void CreateSeveredLegPrefab(string path)
+        {
+            GameObject legObj = new GameObject("SeveredLeg");
+            
+            MeshFilter meshFilter = legObj.AddComponent<MeshFilter>();
+            meshFilter.sharedMesh = PrimitiveMeshGenerator.CreateCapsuleMesh(0.8f, 0.1f);
+            
+            MeshRenderer renderer = legObj.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial = CreateDefaultLimbMaterial();
+            
+            CapsuleCollider collider = legObj.AddComponent<CapsuleCollider>();
+            collider.height = 0.8f;
+            collider.radius = 0.1f;
+            collider.direction = 1;
+            
+            Rigidbody rb = legObj.AddComponent<Rigidbody>();
+            rb.mass = 3f;
+            rb.drag = 0.5f;
+            rb.angularDrag = 0.5f;
+            
+            legObj.AddComponent<SeveredLimb>();
+            
+            string prefabPath = path + "SeveredLeg.prefab";
+            PrefabUtility.SaveAsPrefabAsset(legObj, prefabPath);
+            Object.DestroyImmediate(legObj);
+        }
+
+        private static Material CreateDefaultLimbMaterial()
+        {
+            Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            mat.color = new Color(0.6f, 0.3f, 0.3f);
+            return mat;
+        }
+
+        private static void CreateMaterial(string path, string name, Color color)
+        {
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null)
+            {
+                shader = Shader.Find("Standard");
+            }
+            
+            Material mat = new Material(shader);
+            mat.name = name;
+            mat.color = color;
+            
+            mat.SetFloat("_Smoothness", 0.3f);
+            mat.SetFloat("_Metallic", 0.0f);
+            
+            if (mat.HasProperty("_Surface"))
+            {
+                mat.SetFloat("_Surface", 0);
+            }
+            
+            mat.enableInstancing = true;
+            
+            string fullPath = path + name + ".mat";
+            AssetDatabase.CreateAsset(mat, fullPath);
+            
+            Debug.Log($"Created material: {fullPath}");
+        }
+
+        private static void CreateGroundPlane(string path)
+        {
+            GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            ground.name = "GroundPlane";
+            ground.transform.localScale = new Vector3(5f, 1f, 5f);
+            ground.transform.position = new Vector3(0f, 0f, 0f);
+            
+            var renderer = ground.GetComponent<MeshRenderer>();
+            if (renderer != null)
+            {
+                Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                mat.color = new Color(0.29f, 0.22f, 0.16f);
+                mat.SetFloat("_Smoothness", 0.2f);
+                renderer.sharedMaterial = mat;
+                
+                AssetDatabase.CreateAsset(mat, "Assets/Art/Materials/Environment/M_Ground.mat");
+            }
+            
+            string prefabPath = path + "GroundPlane.prefab";
+            PrefabUtility.SaveAsPrefabAsset(ground, prefabPath);
+            Object.DestroyImmediate(ground);
+            
+            Debug.Log($"Created: {prefabPath}");
+        }
+
+        private static void CreateStake(string path)
+        {
+            GameObject stake = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            stake.name = "WoodenStake";
+            stake.transform.localScale = new Vector3(0.1f, 1f, 0.1f);
+            stake.transform.position = new Vector3(0f, 1f, 0f);
+            
+            var renderer = stake.GetComponent<MeshRenderer>();
+            if (renderer != null)
+            {
+                Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                mat.color = new Color(0.35f, 0.25f, 0.15f);
+                mat.SetFloat("_Smoothness", 0.1f);
+                renderer.sharedMaterial = mat;
+                
+                AssetDatabase.CreateAsset(mat, "Assets/Art/Materials/Environment/M_Wood.mat");
+            }
+            
+            string prefabPath = path + "WoodenStake.prefab";
+            PrefabUtility.SaveAsPrefabAsset(stake, prefabPath);
+            Object.DestroyImmediate(stake);
+            
+            Debug.Log($"Created: {prefabPath}");
+        }
+
+        private static void CreateRock(string path)
+        {
+            GameObject rock = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            rock.name = "Rock";
+            rock.transform.localScale = new Vector3(0.8f, 0.6f, 0.9f);
+            rock.transform.position = new Vector3(0f, 0.3f, 0f);
+            
+            var renderer = rock.GetComponent<MeshRenderer>();
+            if (renderer != null)
+            {
+                Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                mat.color = new Color(0.4f, 0.4f, 0.4f);
+                mat.SetFloat("_Smoothness", 0.1f);
+                renderer.sharedMaterial = mat;
+                
+                AssetDatabase.CreateAsset(mat, "Assets/Art/Materials/Environment/M_Stone.mat");
+            }
+            
+            string prefabPath = path + "Rock.prefab";
+            PrefabUtility.SaveAsPrefabAsset(rock, prefabPath);
+            Object.DestroyImmediate(rock);
+            
+            Debug.Log($"Created: {prefabPath}");
+        }
+
+        private static void CreateDebris(string path)
+        {
+            GameObject debris = new GameObject("Debris");
+            
+            for (int i = 0; i < 3; i++)
+            {
+                GameObject piece = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                piece.name = $"DebrisPiece{i}";
+                piece.transform.SetParent(debris.transform);
+                piece.transform.localPosition = new Vector3(
+                    Random.Range(-0.3f, 0.3f),
+                    0.1f,
+                    Random.Range(-0.3f, 0.3f)
+                );
+                piece.transform.localRotation = Random.rotation;
+                piece.transform.localScale = new Vector3(
+                    Random.Range(0.1f, 0.2f),
+                    Random.Range(0.05f, 0.1f),
+                    Random.Range(0.1f, 0.2f)
+                );
+                
+                var renderer = piece.GetComponent<MeshRenderer>();
+                if (renderer != null)
+                {
+                    Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                    mat.color = new Color(0.3f, 0.25f, 0.2f);
+                    renderer.sharedMaterial = mat;
+                }
+            }
+            
+            string prefabPath = path + "Debris.prefab";
+            PrefabUtility.SaveAsPrefabAsset(debris, prefabPath);
+            Object.DestroyImmediate(debris);
+            
+            Debug.Log($"Created: {prefabPath}");
+        }
+
+        private static void CreateBloodDecalVariant(string path, string name, int variant)
+        {
+            GameObject decalObj = new GameObject(name);
+            
+            var decalProjector = decalObj.AddComponent<DecalProjector>();
+            if (decalProjector != null)
+            {
+                decalProjector.size = new Vector3(1f, 1f, 0.5f);
+                decalProjector.pivot = new Vector3(0f, 0f, 0.5f);
+                
+                Material decalMat = CreateBloodDecalMaterial(variant);
+                decalProjector.material = decalMat;
+                
+                string matPath = $"Assets/Art/Materials/Effects/M_BloodDecal_{variant:00}.mat";
+                AssetDatabase.CreateAsset(decalMat, matPath);
+            }
+            
+            string prefabPath = path + name + ".prefab";
+            PrefabUtility.SaveAsPrefabAsset(decalObj, prefabPath);
+            Object.DestroyImmediate(decalObj);
+            
+            Debug.Log($"Created: {prefabPath}");
+        }
+
+        private static Material CreateBloodDecalMaterial(int variant)
+        {
+            Shader shader = Shader.Find("Universal Render Pipeline/Decal");
+            if (shader == null)
+            {
+                shader = Shader.Find("Shader Graphs/Decal");
+            }
+            if (shader == null)
+            {
+                shader = Shader.Find("Universal Render Pipeline/Lit");
+            }
+            
+            Material mat = new Material(shader);
+            mat.name = $"M_BloodDecal_{variant:00}";
+            
+            Color bloodColor = new Color(0.42f, 0.063f, 0.063f, 0.8f);
+            mat.color = bloodColor;
+            
+            if (mat.HasProperty("_BaseColor"))
+            {
+                mat.SetColor("_BaseColor", bloodColor);
+            }
+            
+            if (mat.HasProperty("_Smoothness"))
+            {
+                mat.SetFloat("_Smoothness", 0.2f);
+            }
+            
+            return mat;
+        }
+
+        private static void CreateBloodBurstPrefab(string path)
+        {
+            GameObject burstObj = new GameObject("BloodBurst");
+            
+            burstObj.AddComponent<ParticleSystem>();
+            burstObj.AddComponent<BloodBurstVFX>();
+            
+            string prefabPath = path + "BloodBurst.prefab";
+            PrefabUtility.SaveAsPrefabAsset(burstObj, prefabPath);
+            Object.DestroyImmediate(burstObj);
+            
+            Debug.Log($"Created: {prefabPath}");
+        }
+
+        #endregion
+
+        #region Validation Tool
+
+        [MenuItem("Shield Wall Builder/Validation/Validate Visual System", false, 300)]
+        public static void ValidateVisualSystem()
+        {
+            Debug.Log("=== VISUAL SYSTEM VALIDATION ===\n");
+            
+            ValidateFolderStructure();
+            ValidateScripts();
+            ValidatePrefabs();
+            ValidateMaterials();
+            
+            Debug.Log("\n=== VALIDATION COMPLETE ===");
+        }
+
+        private static void ValidateFolderStructure()
+        {
+            Debug.Log("--- Folder Structure ---");
+            
+            ValidateFolder("Assets/Prefabs/Characters");
+            ValidateFolder("Assets/Prefabs/Gore");
+            ValidateFolder("Assets/Prefabs/VFX");
+            ValidateFolder("Assets/Art/Models/Characters");
+            ValidateFolder("Assets/Art/Materials/Characters");
+            ValidateFolder("Assets/Art/Models/Environment");
+            ValidateFolder("Assets/Art/Materials/Environment");
+            
+            Debug.Log("");
+        }
+
+        private static void ValidateScripts()
+        {
+            Debug.Log("--- Core Scripts ---");
+            
+            ValidateScript("Assets/Scripts/Data/ModularCharacterData.cs");
+            ValidateScript("Assets/Scripts/Visual/ModularCharacterBuilder.cs");
+            ValidateScript("Assets/Scripts/Visual/SeveredLimb.cs");
+            ValidateScript("Assets/Scripts/Visual/DismembermentController.cs");
+            ValidateScript("Assets/Scripts/Visual/PrimitiveMeshGenerator.cs");
+            ValidateScript("Assets/Scripts/Visual/ActionDismembermentMapper.cs");
+            ValidateScript("Assets/Scripts/Data/ToonMaterialPalette.cs");
+            ValidateScript("Assets/Scripts/Visual/LODController.cs");
+            
+            Debug.Log("");
+        }
+
+        private static void ValidatePrefabs()
+        {
+            Debug.Log("--- Prefabs ---");
+            
+            ValidatePrefab("Assets/Prefabs/Gore/SeveredHead.prefab");
+            ValidatePrefab("Assets/Prefabs/Gore/SeveredArm.prefab");
+            ValidatePrefab("Assets/Prefabs/Gore/SeveredLeg.prefab");
+            ValidatePrefab("Assets/Prefabs/VFX/BloodBurst.prefab");
+            
+            Debug.Log("");
+        }
+
+        private static void ValidateMaterials()
+        {
+            Debug.Log("--- Materials ---");
+            
+            ValidateMaterial("Assets/Art/Materials/Characters/M_Character_Player.mat");
+            ValidateMaterial("Assets/Art/Materials/Characters/M_Character_Brother.mat");
+            ValidateMaterial("Assets/Art/Materials/Characters/M_Character_Thrall.mat");
+            ValidateMaterial("Assets/Art/Materials/Characters/M_Character_Warrior.mat");
+            ValidateMaterial("Assets/Art/Materials/Characters/M_Character_Berserker.mat");
+            ValidateMaterial("Assets/Art/Materials/Characters/M_Character_Archer.mat");
+            ValidateMaterial("Assets/Art/Materials/Characters/M_Blood.mat");
+            ValidateMaterial("Assets/Art/Materials/Characters/M_Gore.mat");
+            
+            Debug.Log("");
+        }
+
+        private static void ValidateFolder(string path)
+        {
+            if (AssetDatabase.IsValidFolder(path))
+            {
+                Debug.Log($"[PASS] Folder exists: {path}");
+            }
+            else
+            {
+                Debug.LogError($"[FAIL] Folder missing: {path}");
+            }
+        }
+
+        private static void ValidateScript(string path)
+        {
+            var script = AssetDatabase.LoadAssetAtPath<MonoScript>(path);
+            if (script != null)
+            {
+                Debug.Log($"[PASS] Script exists: {path}");
+            }
+            else
+            {
+                Debug.LogWarning($"[WARN] Script not found: {path}");
+            }
+        }
+
+        private static void ValidatePrefab(string path)
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (prefab != null)
+            {
+                Debug.Log($"[PASS] Prefab exists: {path}");
+            }
+            else
+            {
+                Debug.LogWarning($"[WARN] Prefab not created yet (use editor tools): {path}");
+            }
+        }
+
+        private static void ValidateMaterial(string path)
+        {
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material != null)
+            {
+                bool hasInstancing = material.enableInstancing;
+                if (hasInstancing)
+                {
+                    Debug.Log($"[PASS] Material exists with GPU instancing: {path}");
+                }
+                else
+                {
+                    Debug.LogWarning($"[WARN] Material exists but GPU instancing disabled: {path}");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[WARN] Material not created yet (use editor tools): {path}");
+            }
+        }
+
+        #endregion
+
         #region Battle Scene Setup
 
         [MenuItem("Shield Wall Builder/Battle Scene/Setup Managers", false, 200)]
