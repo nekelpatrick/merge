@@ -130,7 +130,9 @@ namespace ShieldWall.Editor
                 var renderer = enemy.GetComponent<Renderer>();
                 if (renderer != null)
                 {
-                    renderer.material.color = new Color(0.5f, 0.2f, 0.2f);
+                    var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                    mat.color = new Color(0.5f, 0.2f, 0.2f);
+                    renderer.sharedMaterial = mat;
                 }
             }
 

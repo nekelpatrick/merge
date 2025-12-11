@@ -109,7 +109,15 @@ namespace ShieldWall.Editor
             CreateRuneAssets();
             CreateBrotherAssets();
             CreateEnemyAssets();
+            
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
             CreateActionAssets();
+            
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
             CreateWaveAssets();
             
             AssetDatabase.SaveAssets();
