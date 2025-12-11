@@ -42,11 +42,19 @@ namespace ShieldWall.UI
         private void HandlePhaseChanged(TurnPhase phase)
         {
             bool visible = phase == TurnPhase.PlayerTurn;
-            gameObject.SetActive(visible);
             
-            if (phase != TurnPhase.PlayerTurn)
+            if (_actionContainer != null)
+            {
+                _actionContainer.gameObject.SetActive(visible);
+            }
+            
+            if (!visible)
             {
                 ClearSelection();
+                foreach (var button in _actionButtons)
+                {
+                    button.gameObject.SetActive(false);
+                }
             }
         }
 
