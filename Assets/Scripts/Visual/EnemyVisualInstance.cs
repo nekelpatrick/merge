@@ -21,12 +21,23 @@ namespace ShieldWall.Visual
         private Color _baseColor;
         private BloodBurstVFX _bloodBurstPrefab;
         private bool _isDying;
+        
+        private ModularCharacterBuilder _modularBuilder;
+        private DismembermentController _dismembermentController;
 
         public void Initialize(EnemySO enemy, Color color, BloodBurstVFX bloodBurstPrefab)
         {
             EnemyData = enemy;
             _baseColor = color;
             _bloodBurstPrefab = bloodBurstPrefab;
+
+            _modularBuilder = GetComponent<ModularCharacterBuilder>();
+            _dismembermentController = GetComponent<DismembermentController>();
+            
+            if (_modularBuilder != null)
+            {
+                return;
+            }
 
             CreateBody(color);
             CreateHead(color);
@@ -83,6 +94,22 @@ namespace ShieldWall.Visual
             _isDying = true;
             StartCoroutine(DeathSequence());
         }
+        
+        public void PlayDeathAnimationWithDismemberment(DismembermentType type)
+        {
+            if (_isDying) return;
+            _isDying = true;
+            
+            if (_dismembermentController != null)
+            {
+                _dismembermentController.TriggerDismemberment(type);
+                StartCoroutine(DismemberedDeathSequence());
+            }
+            else
+            {
+                StartCoroutine(DeathSequence());
+            }
+        }
 
         public void PlayHitReaction()
         {
@@ -137,6 +164,28 @@ namespace ShieldWall.Visual
             
             if (_bodyMaterial != null) _bodyMaterial.color = _baseColor;
             if (_headMaterial != null) _headMaterial.color = _baseColor;
+        }
+        
+        private IEnumerator DismemberedDeathSequence()
+        {
+            Quaternion startRotation = transform.localRotation;
+            Quaternion endRotation = startRotation * Quaternion.Euler(90f, 0f, 0f);
+            
+            float elapsed = 0f;
+            while (elapsed < DEATH_DURATION)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / DEATH_DURATION;
+                float easeT = t * t;
+                
+                transform.localRotation = Quaternion.Slerp(startRotation, endRotation, easeT);
+                
+                yield return null;
+            }
+            
+            yield return new WaitForSeconds(0.2f);
+            
+            Destroy(gameObject);
         }
 
         private void OnDestroy()

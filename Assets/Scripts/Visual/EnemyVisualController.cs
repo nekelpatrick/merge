@@ -88,8 +88,31 @@ namespace ShieldWall.Visual
         {
             if (_activeEnemies.TryGetValue(enemy, out var instance))
             {
-                instance.PlayDeathAnimation();
+                DismembermentType dismembermentType = DetermineDismembermentType();
+                instance.PlayDeathAnimationWithDismemberment(dismembermentType);
                 _activeEnemies.Remove(enemy);
+            }
+        }
+        
+        private DismembermentType DetermineDismembermentType()
+        {
+            int random = Random.Range(0, 100);
+            
+            if (random < 40)
+            {
+                return DismembermentType.Decapitation;
+            }
+            else if (random < 70)
+            {
+                return DismembermentType.ArmSword;
+            }
+            else if (random < 85)
+            {
+                return DismembermentType.ArmShield;
+            }
+            else
+            {
+                return DismembermentType.Random;
             }
         }
 

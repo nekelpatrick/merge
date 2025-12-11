@@ -196,6 +196,6 @@ static void ApplyFullAtmosphere()
 
 ## Reference Files
 
-- `Assets/Documentation/VisualStyleSystem.md` — Full color palette
+- `Assets/Documentation/Core/VisualStyleSystem.md` — Full color palette
 - `Assets/Settings/` — Existing URP settings
 
