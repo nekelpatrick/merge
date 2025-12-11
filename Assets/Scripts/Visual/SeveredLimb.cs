@@ -46,8 +46,8 @@ namespace ShieldWall.Visual
             if (_rigidbody != null)
             {
                 _rigidbody.mass = 1f;
-                _rigidbody.drag = 0.5f;
-                _rigidbody.angularDrag = 0.5f;
+                _rigidbody.linearDamping = 0.5f;
+                _rigidbody.angularDamping = 0.5f;
                 
                 Vector3 randomDirection = (direction + Random.insideUnitSphere * 0.3f).normalized;
                 _rigidbody.AddForce(randomDirection * _tumbleForce, ForceMode.Impulse);

@@ -113,16 +113,7 @@ namespace ShieldWall.UI
 
         private string GetRuneSymbol(RuneType type)
         {
-            return type switch
-            {
-                RuneType.Thurs => "SH",
-                RuneType.Tyr => "AX",
-                RuneType.Gebo => "SP",
-                RuneType.Berkana => "BR",
-                RuneType.Othala => "OD",
-                RuneType.Laguz => "LO",
-                _ => "?"
-            };
+            return RuneDisplay.GetFullName(type);
         }
 
         private Color GetDefaultColor(RuneType type)
