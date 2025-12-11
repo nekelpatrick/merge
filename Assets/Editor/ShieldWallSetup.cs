@@ -6,6 +6,8 @@ using ShieldWall.Dice;
 using ShieldWall.Core;
 using ShieldWall.Combat;
 using ShieldWall.ShieldWall;
+using System.Collections.Generic;
+using System.IO;
 
 namespace ShieldWall.Editor
 {
@@ -387,6 +389,274 @@ namespace ShieldWall.Editor
             }
 
             AssetDatabase.CreateAsset(wave, path);
+        }
+
+        private static void EnsureDirectoryExists(string path)
+        {
+            if (!AssetDatabase.IsValidFolder(path))
+            {
+                string parent = Path.GetDirectoryName(path).Replace("\\", "/");
+                string folder = Path.GetFileName(path);
+                if (!string.IsNullOrEmpty(parent) && !string.IsNullOrEmpty(folder))
+                {
+                    AssetDatabase.CreateFolder(parent, folder);
+                }
+            }
+        }
+
+        [MenuItem("ShieldWall/Create Assets/Create Scenario Assets")]
+        public static void CreateScenarioAssets()
+        {
+            string path = "Assets/ScriptableObjects/Scenarios";
+            EnsureDirectoryExists(path);
+
+            var easyWaves = new List<WaveConfigSO>();
+            var normalWaves = new List<WaveConfigSO>();
+            var hardWaves = new List<WaveConfigSO>();
+
+            for (int i = 1; i <= 3; i++)
+            {
+                var w = AssetDatabase.LoadAssetAtPath<WaveConfigSO>($"Assets/ScriptableObjects/Waves/Wave_Easy_0{i}.asset");
+                if (w != null) easyWaves.Add(w);
+            }
+            for (int i = 1; i <= 5; i++)
+            {
+                var w = AssetDatabase.LoadAssetAtPath<WaveConfigSO>($"Assets/ScriptableObjects/Waves/Wave_{i:D2}.asset");
+                if (w != null) normalWaves.Add(w);
+            }
+            for (int i = 1; i <= 4; i++)
+            {
+                var w = AssetDatabase.LoadAssetAtPath<WaveConfigSO>($"Assets/ScriptableObjects/Waves/Wave_Hard_0{i}.asset");
+                if (w != null) hardWaves.Add(w);
+            }
+
+            var breach = CreateOrUpdateScenario($"{path}/Scenario_TheBreach.asset",
+                "The Breach",
+                "Raiders have broken through the outer wall. Hold them off while the village evacuates.",
+                Difficulty.Easy, easyWaves, 15, 6, 5, true, null);
+
+            var hold = CreateOrUpdateScenario($"{path}/Scenario_HoldTheLine.asset",
+                "Hold the Line",
+                "The enemy comes in force. Your shield wall is all that stands between them and your people.",
+                Difficulty.Normal, normalWaves, 12, 5, 4, true, null);
+
+            CreateOrUpdateScenario($"{path}/Scenario_TheLastStand.asset",
+                "The Last Stand",
+                "Berserkers and archers. Few supplies. No retreat. Only glory or death awaits.",
+                Difficulty.Hard, hardWaves, 10, 4, 4, false, hold);
+
+            AssetDatabase.SaveAssets();
+            Debug.Log("Shield Wall: Created 3 scenario assets in " + path);
+        }
+
+        private static BattleScenarioSO CreateOrUpdateScenario(string assetPath, string scenarioName,
+            string description, Difficulty difficulty, List<WaveConfigSO> waves,
+            int stamina, int health, int dice, bool unlocked, BattleScenarioSO prerequisite)
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<BattleScenarioSO>(assetPath);
+            if (existing != null)
+            {
+                existing.scenarioName = scenarioName;
+                existing.description = description;
+                existing.difficulty = difficulty;
+                existing.waves = waves;
+                existing.startingStamina = stamina;
+                existing.startingPlayerHealth = health;
+                existing.startingDiceCount = dice;
+                existing.isUnlocked = unlocked;
+                existing.prerequisite = prerequisite;
+                EditorUtility.SetDirty(existing);
+                return existing;
+            }
+
+            var scenario = ScriptableObject.CreateInstance<BattleScenarioSO>();
+            scenario.scenarioName = scenarioName;
+            scenario.description = description;
+            scenario.difficulty = difficulty;
+            scenario.waves = waves;
+            scenario.startingStamina = stamina;
+            scenario.startingPlayerHealth = health;
+            scenario.startingDiceCount = dice;
+            scenario.isUnlocked = unlocked;
+            scenario.prerequisite = prerequisite;
+
+            AssetDatabase.CreateAsset(scenario, assetPath);
+            return scenario;
+        }
+
+        [MenuItem("ShieldWall/Create Assets/Create Tutorial Hint Assets")]
+        public static void CreateTutorialHintAssets()
+        {
+            string path = "Assets/ScriptableObjects/Tutorial";
+            EnsureDirectoryExists(path);
+
+            CreateHint(path, "Hint_LockDice", "lock_dice",
+                "Click on a die to LOCK it. Locked dice won't re-roll.",
+                TurnPhase.PlayerTurn, 1, false, true, 6f);
+
+            CreateHint(path, "Hint_MatchRunes", "match_runes",
+                "Match rune symbols to unlock powerful ACTIONS. Try locking matching dice!",
+                TurnPhase.PlayerTurn, 1, true, false, 6f);
+
+            CreateHint(path, "Hint_Brothers", "brothers_block",
+                "Your shield brothers will try to BLOCK attacks for you. Keep them alive!",
+                TurnPhase.WaveStart, 2, false, false, 5f);
+
+            CreateHint(path, "Hint_Stamina", "stamina_drain",
+                "STAMINA drains each turn. When it runs out, you lose. Strike fast!",
+                TurnPhase.Resolution, 3, false, false, 5f);
+
+            CreateHint(path, "Hint_Berserkers", "berserkers",
+                "BERSERKERS ignore blocks! Kill them quickly or suffer.",
+                TurnPhase.WaveStart, 4, false, false, 5f);
+
+            AssetDatabase.SaveAssets();
+            Debug.Log("Shield Wall: Created 5 tutorial hint assets in " + path);
+        }
+
+        private static void CreateHint(string path, string fileName, string hintId, string text,
+            TurnPhase phase, int wave, bool requiresLocked, bool requiresNoLocked, float duration)
+        {
+            string assetPath = $"{path}/{fileName}.asset";
+            var existing = AssetDatabase.LoadAssetAtPath<TutorialHintSO>(assetPath);
+            if (existing != null)
+            {
+                existing.hintId = hintId;
+                existing.hintText = text;
+                existing.triggerPhase = phase;
+                existing.triggerWave = wave;
+                existing.requiresDiceLocked = requiresLocked;
+                existing.requiresNoDiceLocked = requiresNoLocked;
+                existing.displayDuration = duration;
+                existing.autoDismiss = true;
+                existing.pauseGame = false;
+                EditorUtility.SetDirty(existing);
+                return;
+            }
+
+            var hint = ScriptableObject.CreateInstance<TutorialHintSO>();
+            hint.hintId = hintId;
+            hint.hintText = text;
+            hint.triggerPhase = phase;
+            hint.triggerWave = wave;
+            hint.requiresDiceLocked = requiresLocked;
+            hint.requiresNoDiceLocked = requiresNoLocked;
+            hint.displayDuration = duration;
+            hint.autoDismiss = true;
+            hint.pauseGame = false;
+            AssetDatabase.CreateAsset(hint, assetPath);
+        }
+
+        [MenuItem("ShieldWall/Create Assets/Create Easy Wave Assets")]
+        public static void CreateEasyWaveAssets()
+        {
+            string path = "Assets/ScriptableObjects/Waves";
+            EnsureDirectoryExists(path);
+
+            var thrall = AssetDatabase.LoadAssetAtPath<EnemySO>("Assets/ScriptableObjects/Enemies/Enemy_Thrall.asset");
+            var warrior = AssetDatabase.LoadAssetAtPath<EnemySO>("Assets/ScriptableObjects/Enemies/Enemy_Warrior.asset");
+
+            if (thrall == null || warrior == null)
+            {
+                Debug.LogError("Shield Wall: Could not find enemy assets. Create enemies first.");
+                return;
+            }
+
+            CreateNamedWave(path, "Wave_Easy_01", 1,
+                new List<EnemySpawn> { new EnemySpawn { enemy = thrall, count = 2 } },
+                true, "tutorial_dice");
+
+            CreateNamedWave(path, "Wave_Easy_02", 2,
+                new List<EnemySpawn> { new EnemySpawn { enemy = thrall, count = 3 } },
+                false, "");
+
+            CreateNamedWave(path, "Wave_Easy_03", 3,
+                new List<EnemySpawn>
+                {
+                    new EnemySpawn { enemy = thrall, count = 2 },
+                    new EnemySpawn { enemy = warrior, count = 1 }
+                },
+                false, "");
+
+            AssetDatabase.SaveAssets();
+            Debug.Log("Shield Wall: Created 3 easy wave assets in " + path);
+        }
+
+        [MenuItem("ShieldWall/Create Assets/Create Hard Wave Assets")]
+        public static void CreateHardWaveAssets()
+        {
+            string path = "Assets/ScriptableObjects/Waves";
+            EnsureDirectoryExists(path);
+
+            var warrior = AssetDatabase.LoadAssetAtPath<EnemySO>("Assets/ScriptableObjects/Enemies/Enemy_Warrior.asset");
+            var berserker = AssetDatabase.LoadAssetAtPath<EnemySO>("Assets/ScriptableObjects/Enemies/Enemy_Berserker.asset");
+            var archer = AssetDatabase.LoadAssetAtPath<EnemySO>("Assets/ScriptableObjects/Enemies/Enemy_Archer.asset");
+
+            if (warrior == null || berserker == null || archer == null)
+            {
+                Debug.LogError("Shield Wall: Could not find enemy assets. Create enemies first.");
+                return;
+            }
+
+            CreateNamedWave(path, "Wave_Hard_01", 1,
+                new List<EnemySpawn>
+                {
+                    new EnemySpawn { enemy = warrior, count = 2 },
+                    new EnemySpawn { enemy = berserker, count = 1 }
+                },
+                false, "");
+
+            CreateNamedWave(path, "Wave_Hard_02", 2,
+                new List<EnemySpawn> { new EnemySpawn { enemy = berserker, count = 3 } },
+                false, "");
+
+            CreateNamedWave(path, "Wave_Hard_03", 3,
+                new List<EnemySpawn>
+                {
+                    new EnemySpawn { enemy = archer, count = 2 },
+                    new EnemySpawn { enemy = warrior, count = 2 }
+                },
+                false, "");
+
+            CreateNamedWave(path, "Wave_Hard_04", 4,
+                new List<EnemySpawn> { new EnemySpawn { enemy = berserker, count = 4 } },
+                false, "");
+
+            AssetDatabase.SaveAssets();
+            Debug.Log("Shield Wall: Created 4 hard wave assets in " + path);
+        }
+
+        private static void CreateNamedWave(string path, string fileName, int waveNum,
+            List<EnemySpawn> enemies, bool hasEvent, string eventId)
+        {
+            string assetPath = $"{path}/{fileName}.asset";
+            var existing = AssetDatabase.LoadAssetAtPath<WaveConfigSO>(assetPath);
+            if (existing != null)
+            {
+                existing.waveNumber = waveNum;
+                existing.enemies = enemies;
+                existing.hasScriptedEvent = hasEvent;
+                existing.scriptedEventId = eventId;
+                EditorUtility.SetDirty(existing);
+                return;
+            }
+
+            var wave = ScriptableObject.CreateInstance<WaveConfigSO>();
+            wave.waveNumber = waveNum;
+            wave.enemies = enemies;
+            wave.hasScriptedEvent = hasEvent;
+            wave.scriptedEventId = eventId;
+            AssetDatabase.CreateAsset(wave, assetPath);
+        }
+
+        [MenuItem("ShieldWall/Create Assets/Create All Phase 3 Assets")]
+        public static void CreateAllPhase3Assets()
+        {
+            CreateEasyWaveAssets();
+            CreateHardWaveAssets();
+            CreateScenarioAssets();
+            CreateTutorialHintAssets();
+            Debug.Log("=== Shield Wall: All Phase 3 assets created! ===");
         }
     }
 }

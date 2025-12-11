@@ -1,0 +1,145 @@
+# Shield Wall - Cursor Rules
+
+## Development Methodology
+
+This project uses the **Phase-Track-Agent Model** for AI-assisted development.
+See [`Assets/Documentation/DevelopmentMethodology.md`](Assets/Documentation/DevelopmentMethodology.md) for full details.
+
+### Quick Reference
+
+1. **Phases** = Major milestones with architecture diagrams and success criteria
+2. **Tracks** = Independent workstreams (A, B, C...) that own specific folders
+3. **Agents** = One AI session per track, working in parallel
+
+### Track Assignment Rules
+
+When assigned a track:
+- **ONLY** modify files listed in your track scope
+- Use `GameEvents` for cross-system communication
+- Follow existing patterns in the codebase
+- Do NOT touch files owned by other tracks
+
+---
+
+## Project Structure
+
+```
+Assets/
+├── Scripts/
+│   ├── Core/           → GameManager, TurnManager, BattleState
+│   ├── Dice/           → RuneDie, DicePool, ComboResolver
+│   ├── ShieldWall/     → ShieldWallManager, ShieldBrother, PlayerWarrior
+│   ├── Combat/         → EnemyWaveController, Enemy, CombatResolver
+│   ├── UI/             → All UI components
+│   ├── Visual/         → 3D visuals, VFX, screen effects
+│   ├── Audio/          → AudioManager and sound handling
+│   └── Data/           → ScriptableObject definitions
+├── ScriptableObjects/  → Data instances (Runes/, Brothers/, Enemies/, Waves/)
+├── Prefabs/            → Dice/, Characters/, UI/
+├── Documentation/      → GDD, Visual Style, Methodology
+└── Editor/             → Editor scripts and setup utilities
+```
+
+---
+
+## Code Conventions
+
+### Naming
+| Type | Convention | Example |
+|------|------------|---------|
+| ScriptableObject | `TypeSO` | `RuneSO`, `EnemySO` |
+| Manager/Controller | `TypeManager` | `ShieldWallManager` |
+| UI Component | `TypeUI` | `DiceUI`, `WallStatusUI` |
+| Event | `OnAction` | `OnDiceRolled`, `OnBrotherDied` |
+| Private field | `_camelCase` | `_currentPhase` |
+| Public property | `PascalCase` | `CurrentPhase` |
+
+### Event-Driven Communication
+
+Systems communicate via `GameEvents.cs`, never direct references:
+
+```csharp
+// Subscribe in OnEnable
+void OnEnable() => GameEvents.OnEnemyKilled += HandleEnemyKilled;
+void OnDisable() => GameEvents.OnEnemyKilled -= HandleEnemyKilled;
+
+// Fire events via Raise methods
+GameEvents.RaiseEnemyKilled(enemy);
+```
+
+### MonoBehaviour Lifecycle
+
+- `Awake()` — Cache component references
+- `OnEnable()` — Subscribe to events
+- `Start()` — Initialize runtime dependencies
+- `OnDisable()` — Unsubscribe from events
+
+---
+
+## Common Patterns
+
+### ScriptableObject for Data
+
+```csharp
+[CreateAssetMenu(fileName = "NewType_", menuName = "ShieldWall/TypeName")]
+public class TypeNameSO : ScriptableObject
+{
+    public string displayName;
+    public int value;
+    [TextArea] public string description;
+}
+```
+
+### UI Never Knows Game Logic
+
+```csharp
+// WRONG - UI calling game logic
+void OnClick() => gameManager.DoThing();
+
+// RIGHT - UI fires event
+public static event Action OnButtonClicked;
+void OnClick() => OnButtonClicked?.Invoke();
+```
+
+---
+
+## Available Events (GameEvents.cs)
+
+### Dice System
+- `OnDiceRolled(RuneDie[])` — After dice roll
+- `OnDieLockToggled(int index, bool locked)` — Die lock state changed
+- `OnAvailableActionsChanged(List<ActionSO>)` — Combos recalculated
+
+### Combat
+- `OnEnemyWaveSpawned(List<EnemySO>)` — Wave enemies revealed
+- `OnEnemyKilled(EnemySO)` — Enemy died
+- `OnAttackBlocked(Attack)` — Attack was blocked
+- `OnAttackLanded(Attack)` — Attack dealt damage
+
+### Shield Wall
+- `OnBrotherWounded(ShieldBrotherSO, int damage)` — Brother took damage
+- `OnBrotherDied(ShieldBrotherSO)` — Brother fell
+- `OnWallIntegrityChanged(int aliveBrothers)` — Wall status changed
+
+### Player
+- `OnStaminaChanged(int)` — Stamina updated
+- `OnPlayerWounded(int damage)` — Player took damage
+
+### Turn Flow
+- `OnPhaseChanged(TurnPhase)` — Turn phase transition
+- `OnWaveStarted(int waveNumber)` — New wave began
+- `OnWaveCleared()` — All enemies in wave dead
+- `OnBattleEnded(bool victory)` — Battle concluded
+
+---
+
+## DO NOT
+
+1. Put turn logic in `Update()` — Use state machine with explicit transitions
+2. Reference UI from game systems — Use events
+3. Hardcode dice/enemy/brother data — Use ScriptableObjects
+4. Instantiate during combat — Use object pools
+5. Use strings for state — Use enums
+6. Make everything a singleton — Prefer dependency injection or SO references
+7. Skip resolution order — Strikes → Blocks → Auto-defense → Damage
+

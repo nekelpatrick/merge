@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4e78e081be379044aa92c0724765c55, type: 3}
+  m_Name: Hint_LockDice
+  m_EditorClassIdentifier: 
+  hintId: lock_dice
+  hintText: Click on a die to LOCK it. Locked dice won't re-roll.
+  triggerPhase: 1
+  triggerWave: 1
+  requiresDiceLocked: 0
+  requiresNoDiceLocked: 1
+  displayDuration: 6
+  autoDismiss: 1
+  pauseGame: 0
+

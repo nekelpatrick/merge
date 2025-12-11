@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
@@ -800,6 +802,233 @@ namespace ShieldWall.Editor
             }
 
             Debug.Log("ScriptableObject assets assigned.");
+        }
+
+        [MenuItem("Shield Wall/Scene Setup/Create Volume Profile")]
+        public static void CreateVolumeProfile()
+        {
+            string profilePath = "Assets/Settings/BattleVolumeProfile.asset";
+            
+            var existingProfile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(profilePath);
+            if (existingProfile != null)
+            {
+                Debug.Log("BattleVolumeProfile already exists. Updating settings...");
+                ConfigureVolumeProfile(existingProfile);
+                EditorUtility.SetDirty(existingProfile);
+                AssetDatabase.SaveAssets();
+                return;
+            }
+
+            var profile = ScriptableObject.CreateInstance<VolumeProfile>();
+            ConfigureVolumeProfile(profile);
+            
+            AssetDatabase.CreateAsset(profile, profilePath);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
+            Debug.Log($"Created BattleVolumeProfile at {profilePath}");
+        }
+
+        private static void ConfigureVolumeProfile(VolumeProfile profile)
+        {
+            if (!profile.Has<ColorAdjustments>())
+                profile.Add<ColorAdjustments>();
+            var colorGrading = profile.components.Find(c => c is ColorAdjustments) as ColorAdjustments;
+            if (colorGrading != null)
+            {
+                colorGrading.active = true;
+                colorGrading.saturation.Override(-15f);
+                colorGrading.colorFilter.Override(new Color(0.95f, 0.97f, 1f));
+                colorGrading.contrast.Override(10f);
+            }
+
+            if (!profile.Has<Vignette>())
+                profile.Add<Vignette>();
+            var vignette = profile.components.Find(c => c is Vignette) as Vignette;
+            if (vignette != null)
+            {
+                vignette.active = true;
+                vignette.intensity.Override(0.25f);
+                vignette.smoothness.Override(0.4f);
+                vignette.color.Override(new Color(0.16f, 0.09f, 0.06f));
+            }
+
+            if (!profile.Has<Bloom>())
+                profile.Add<Bloom>();
+            var bloom = profile.components.Find(c => c is Bloom) as Bloom;
+            if (bloom != null)
+            {
+                bloom.active = true;
+                bloom.intensity.Override(0.5f);
+                bloom.threshold.Override(1.0f);
+                bloom.scatter.Override(0.6f);
+            }
+
+            if (!profile.Has<FilmGrain>())
+                profile.Add<FilmGrain>();
+            var filmGrain = profile.components.Find(c => c is FilmGrain) as FilmGrain;
+            if (filmGrain != null)
+            {
+                filmGrain.active = true;
+                filmGrain.type.Override(FilmGrainLookup.Medium1);
+                filmGrain.intensity.Override(0.1f);
+            }
+        }
+
+        [MenuItem("Shield Wall/Scene Setup/Setup Battle Lighting")]
+        public static void SetupBattleLighting()
+        {
+            var sun = Object.FindFirstObjectByType<Light>();
+            if (sun == null || sun.type != LightType.Directional)
+            {
+                var sunGO = new GameObject("Directional Light");
+                sun = sunGO.AddComponent<Light>();
+                sun.type = LightType.Directional;
+            }
+
+            sun.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+            sun.intensity = 0.8f;
+            sun.color = new Color(1f, 0.91f, 0.82f);
+            sun.shadows = LightShadows.Soft;
+            sun.shadowStrength = 0.6f;
+
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+            RenderSettings.ambientLight = new Color(0.1f, 0.1f, 0.1f);
+
+            Debug.Log("Battle lighting configured: Directional light and ambient settings applied.");
+        }
+
+        [MenuItem("Shield Wall/Scene Setup/Create Ground Plane")]
+        public static void CreateGroundPlane()
+        {
+            string materialPath = "Assets/Art/Materials/Environment/Ground.mat";
+            
+            if (!System.IO.Directory.Exists("Assets/Art/Materials/Environment"))
+            {
+                System.IO.Directory.CreateDirectory("Assets/Art/Materials/Environment");
+                AssetDatabase.Refresh();
+            }
+
+            Material groundMat = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            if (groundMat == null)
+            {
+                groundMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                groundMat.SetColor("_BaseColor", new Color(0.29f, 0.22f, 0.16f));
+                groundMat.SetFloat("_Smoothness", 0.1f);
+                groundMat.SetFloat("_Metallic", 0f);
+                
+                AssetDatabase.CreateAsset(groundMat, materialPath);
+                AssetDatabase.SaveAssets();
+                Debug.Log($"Created Ground material at {materialPath}");
+            }
+
+            var existing = GameObject.Find("Ground");
+            if (existing != null)
+            {
+                Object.DestroyImmediate(existing);
+            }
+
+            var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            ground.name = "Ground";
+            ground.transform.position = Vector3.zero;
+            ground.transform.localScale = new Vector3(50f, 1f, 50f);
+            ground.layer = 9;
+            ground.isStatic = true;
+
+            var renderer = ground.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.sharedMaterial = groundMat;
+            }
+
+            Debug.Log("Ground plane created with mud brown material.");
+        }
+
+        [MenuItem("Shield Wall/Scene Setup/Setup Layers")]
+        public static void SetupLayers()
+        {
+            SerializedObject tagManager = new SerializedObject(
+                AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+            
+            SerializedProperty layers = tagManager.FindProperty("layers");
+            
+            SetLayerName(layers, 6, "PlayerView");
+            SetLayerName(layers, 7, "Brothers");
+            SetLayerName(layers, 8, "Enemies");
+            SetLayerName(layers, 9, "Environment");
+            
+            tagManager.ApplyModifiedProperties();
+            
+            Debug.Log("Layers configured: PlayerView(6), Brothers(7), Enemies(8), Environment(9)");
+        }
+
+        private static void SetLayerName(SerializedProperty layers, int index, string name)
+        {
+            SerializedProperty layer = layers.GetArrayElementAtIndex(index);
+            if (layer != null && string.IsNullOrEmpty(layer.stringValue))
+            {
+                layer.stringValue = name;
+            }
+            else if (layer != null && layer.stringValue != name)
+            {
+                layer.stringValue = name;
+            }
+        }
+
+        [MenuItem("Shield Wall/Scene Setup/Add Volume to Scene")]
+        public static void AddVolumeToScene()
+        {
+            string profilePath = "Assets/Settings/BattleVolumeProfile.asset";
+            var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(profilePath);
+            
+            if (profile == null)
+            {
+                Debug.LogWarning("BattleVolumeProfile not found. Run 'Create Volume Profile' first.");
+                CreateVolumeProfile();
+                profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(profilePath);
+            }
+
+            var existing = GameObject.Find("PostProcessVolume");
+            if (existing != null)
+            {
+                Object.DestroyImmediate(existing);
+            }
+
+            var volumeGO = new GameObject("PostProcessVolume");
+            var volume = volumeGO.AddComponent<Volume>();
+            volume.isGlobal = true;
+            volume.priority = 1f;
+            volume.profile = profile;
+
+            Debug.Log("Post-process Volume added to scene with BattleVolumeProfile.");
+        }
+
+        [MenuItem("Shield Wall/Scene Setup/Apply Full Atmosphere")]
+        public static void ApplyFullAtmosphere()
+        {
+            var scene = EditorSceneManager.GetActiveScene();
+            if (!scene.IsValid() || scene.name != "Battle")
+            {
+                scene = EditorSceneManager.OpenScene("Assets/Scenes/Battle.unity");
+                if (!scene.IsValid())
+                {
+                    Debug.LogError("Could not open Battle.unity!");
+                    return;
+                }
+            }
+
+            Debug.Log("Applying full atmosphere setup...");
+
+            SetupLayers();
+            CreateVolumeProfile();
+            AddVolumeToScene();
+            SetupBattleLighting();
+            CreateGroundPlane();
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+
+            Debug.Log("Full atmosphere setup complete! Scene saved.");
         }
 
         private static GameObject CreateOrFind(string name)
