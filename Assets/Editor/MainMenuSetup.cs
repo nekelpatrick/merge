@@ -9,9 +9,10 @@ using ShieldWall.Data;
 
 namespace ShieldWall.Editor
 {
+    [System.Obsolete("Use ShieldWallSceneBuilder instead. This class is deprecated and will be removed in a future version.")]
     public static class MainMenuSetup
     {
-        [MenuItem("Shield Wall/Setup/Build Main Menu Scene")]
+        // [MenuItem("Shield Wall/Setup/Build Main Menu Scene")]
         public static void BuildMainMenuScene()
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
@@ -30,7 +31,7 @@ namespace ShieldWall.Editor
             Debug.Log("MainMenu scene created and saved! Run 'Create Menu Prefabs' next.");
         }
 
-        [MenuItem("Shield Wall/Setup/Create Menu Prefabs")]
+        // [MenuItem("Shield Wall/Setup/Create Menu Prefabs")]
         public static void CreateMenuPrefabs()
         {
             CreateScenarioCardPrefab();
@@ -604,7 +605,7 @@ namespace ShieldWall.Editor
             Debug.Log("Build Settings updated: MainMenu (0), Battle (1)");
         }
 
-        [MenuItem("Shield Wall/Setup/Add Pause Menu to Battle Scene")]
+        // [MenuItem("Shield Wall/Setup/Add Pause Menu to Battle Scene")]
         public static void AddPauseMenuToBattle()
         {
             var scene = EditorSceneManager.OpenScene("Assets/Scenes/Battle.unity");
@@ -643,7 +644,7 @@ namespace ShieldWall.Editor
             }
         }
 
-        [MenuItem("Shield Wall/Setup/Wire ScenarioSelect Prefab")]
+        // [MenuItem("Shield Wall/Setup/Wire ScenarioSelect Prefab")]
         public static void WireScenarioSelectPrefab()
         {
             var scenarioSelect = Object.FindFirstObjectByType<ScenarioSelectUI>();

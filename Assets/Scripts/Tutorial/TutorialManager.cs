@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ShieldWall.Core;
 using ShieldWall.Data;
+using ShieldWall.UI;
 
 namespace ShieldWall.Tutorial
 {
@@ -10,7 +11,7 @@ namespace ShieldWall.Tutorial
         public static TutorialManager Instance { get; private set; }
 
         [SerializeField] private List<TutorialHintSO> _hints;
-        [SerializeField] private UI.TutorialHintUI _hintUI;
+        [SerializeField] private TutorialHintUI _hintUI;
 
         private HashSet<string> _shownHints = new HashSet<string>();
         private int _currentWave = 1;

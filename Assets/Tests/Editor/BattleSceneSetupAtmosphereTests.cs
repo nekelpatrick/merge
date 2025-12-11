@@ -1,9 +1,11 @@
+#pragma warning disable CS0618 // Testing deprecated class until removed
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEditor;
 using System.IO;
+using SWEditor = ShieldWall.Editor;
 
 namespace ShieldWall.Tests.Editor
 {
@@ -52,7 +54,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void CreateVolumeProfile_CreatesAssetAtCorrectPath()
         {
-            ShieldWall.Editor.BattleSceneSetup.CreateVolumeProfile();
+            SWEditor.BattleSceneSetup.CreateVolumeProfile();
             
             var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(VolumeProfilePath);
             
@@ -62,7 +64,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void CreateVolumeProfile_HasColorAdjustments()
         {
-            ShieldWall.Editor.BattleSceneSetup.CreateVolumeProfile();
+            SWEditor.BattleSceneSetup.CreateVolumeProfile();
             
             var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(VolumeProfilePath);
             
@@ -72,7 +74,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void CreateVolumeProfile_HasVignette()
         {
-            ShieldWall.Editor.BattleSceneSetup.CreateVolumeProfile();
+            SWEditor.BattleSceneSetup.CreateVolumeProfile();
             
             var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(VolumeProfilePath);
             
@@ -82,7 +84,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void CreateVolumeProfile_HasBloom()
         {
-            ShieldWall.Editor.BattleSceneSetup.CreateVolumeProfile();
+            SWEditor.BattleSceneSetup.CreateVolumeProfile();
             
             var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(VolumeProfilePath);
             
@@ -92,7 +94,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void CreateVolumeProfile_HasFilmGrain()
         {
-            ShieldWall.Editor.BattleSceneSetup.CreateVolumeProfile();
+            SWEditor.BattleSceneSetup.CreateVolumeProfile();
             
             var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(VolumeProfilePath);
             
@@ -102,7 +104,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void CreateVolumeProfile_VignetteHasCorrectIntensity()
         {
-            ShieldWall.Editor.BattleSceneSetup.CreateVolumeProfile();
+            SWEditor.BattleSceneSetup.CreateVolumeProfile();
             
             var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(VolumeProfilePath);
             profile.TryGet<Vignette>(out var vignette);
@@ -113,7 +115,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void CreateVolumeProfile_ColorAdjustmentsHasCorrectSaturation()
         {
-            ShieldWall.Editor.BattleSceneSetup.CreateVolumeProfile();
+            SWEditor.BattleSceneSetup.CreateVolumeProfile();
             
             var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(VolumeProfilePath);
             profile.TryGet<ColorAdjustments>(out var colorAdjustments);
@@ -124,7 +126,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void CreateVolumeProfile_BloomHasCorrectThreshold()
         {
-            ShieldWall.Editor.BattleSceneSetup.CreateVolumeProfile();
+            SWEditor.BattleSceneSetup.CreateVolumeProfile();
             
             var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(VolumeProfilePath);
             profile.TryGet<Bloom>(out var bloom);
@@ -144,7 +146,7 @@ namespace ShieldWall.Tests.Editor
                 }
             }
 
-            ShieldWall.Editor.BattleSceneSetup.SetupBattleLighting();
+            SWEditor.BattleSceneSetup.SetupBattleLighting();
 
             var sun = Object.FindFirstObjectByType<Light>();
             
@@ -155,7 +157,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void SetupBattleLighting_HasCorrectIntensity()
         {
-            ShieldWall.Editor.BattleSceneSetup.SetupBattleLighting();
+            SWEditor.BattleSceneSetup.SetupBattleLighting();
 
             var sun = Object.FindFirstObjectByType<Light>();
             
@@ -165,7 +167,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void SetupBattleLighting_HasSoftShadows()
         {
-            ShieldWall.Editor.BattleSceneSetup.SetupBattleLighting();
+            SWEditor.BattleSceneSetup.SetupBattleLighting();
 
             var sun = Object.FindFirstObjectByType<Light>();
             
@@ -175,7 +177,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void SetupBattleLighting_HasCorrectRotation()
         {
-            ShieldWall.Editor.BattleSceneSetup.SetupBattleLighting();
+            SWEditor.BattleSceneSetup.SetupBattleLighting();
 
             var sun = Object.FindFirstObjectByType<Light>();
             var expectedRotation = Quaternion.Euler(50f, -30f, 0f);
@@ -187,7 +189,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void CreateGroundPlane_CreatesMaterial()
         {
-            ShieldWall.Editor.BattleSceneSetup.CreateGroundPlane();
+            SWEditor.BattleSceneSetup.CreateGroundPlane();
             
             var material = AssetDatabase.LoadAssetAtPath<Material>(GroundMaterialPath);
             
@@ -197,7 +199,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void CreateGroundPlane_CreatesGroundGameObject()
         {
-            ShieldWall.Editor.BattleSceneSetup.CreateGroundPlane();
+            SWEditor.BattleSceneSetup.CreateGroundPlane();
             
             var ground = GameObject.Find("Ground");
             
@@ -207,7 +209,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void CreateGroundPlane_HasCorrectScale()
         {
-            ShieldWall.Editor.BattleSceneSetup.CreateGroundPlane();
+            SWEditor.BattleSceneSetup.CreateGroundPlane();
             
             var ground = GameObject.Find("Ground");
             
@@ -219,8 +221,8 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void CreateGroundPlane_HasCorrectLayer()
         {
-            ShieldWall.Editor.BattleSceneSetup.SetupLayers();
-            ShieldWall.Editor.BattleSceneSetup.CreateGroundPlane();
+            SWEditor.BattleSceneSetup.SetupLayers();
+            SWEditor.BattleSceneSetup.CreateGroundPlane();
             
             var ground = GameObject.Find("Ground");
             
@@ -230,7 +232,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void CreateGroundPlane_IsStatic()
         {
-            ShieldWall.Editor.BattleSceneSetup.CreateGroundPlane();
+            SWEditor.BattleSceneSetup.CreateGroundPlane();
             
             var ground = GameObject.Find("Ground");
             
@@ -240,7 +242,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void CreateGroundPlane_MaterialHasCorrectColor()
         {
-            ShieldWall.Editor.BattleSceneSetup.CreateGroundPlane();
+            SWEditor.BattleSceneSetup.CreateGroundPlane();
             
             var material = AssetDatabase.LoadAssetAtPath<Material>(GroundMaterialPath);
             var expectedColor = new Color(0.29f, 0.22f, 0.16f);
@@ -254,7 +256,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void SetupLayers_ConfiguresPlayerViewLayer()
         {
-            ShieldWall.Editor.BattleSceneSetup.SetupLayers();
+            SWEditor.BattleSceneSetup.SetupLayers();
             
             string layerName = LayerMask.LayerToName(6);
             
@@ -264,7 +266,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void SetupLayers_ConfiguresBrothersLayer()
         {
-            ShieldWall.Editor.BattleSceneSetup.SetupLayers();
+            SWEditor.BattleSceneSetup.SetupLayers();
             
             string layerName = LayerMask.LayerToName(7);
             
@@ -274,7 +276,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void SetupLayers_ConfiguresEnemiesLayer()
         {
-            ShieldWall.Editor.BattleSceneSetup.SetupLayers();
+            SWEditor.BattleSceneSetup.SetupLayers();
             
             string layerName = LayerMask.LayerToName(8);
             
@@ -284,7 +286,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void SetupLayers_ConfiguresEnvironmentLayer()
         {
-            ShieldWall.Editor.BattleSceneSetup.SetupLayers();
+            SWEditor.BattleSceneSetup.SetupLayers();
             
             string layerName = LayerMask.LayerToName(9);
             
@@ -294,8 +296,8 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void AddVolumeToScene_CreatesVolumeGameObject()
         {
-            ShieldWall.Editor.BattleSceneSetup.CreateVolumeProfile();
-            ShieldWall.Editor.BattleSceneSetup.AddVolumeToScene();
+            SWEditor.BattleSceneSetup.CreateVolumeProfile();
+            SWEditor.BattleSceneSetup.AddVolumeToScene();
             
             var volumeGO = GameObject.Find("PostProcessVolume");
             
@@ -305,8 +307,8 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void AddVolumeToScene_VolumeIsGlobal()
         {
-            ShieldWall.Editor.BattleSceneSetup.CreateVolumeProfile();
-            ShieldWall.Editor.BattleSceneSetup.AddVolumeToScene();
+            SWEditor.BattleSceneSetup.CreateVolumeProfile();
+            SWEditor.BattleSceneSetup.AddVolumeToScene();
             
             var volume = Object.FindFirstObjectByType<Volume>();
             
@@ -316,8 +318,8 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void AddVolumeToScene_VolumeHasProfile()
         {
-            ShieldWall.Editor.BattleSceneSetup.CreateVolumeProfile();
-            ShieldWall.Editor.BattleSceneSetup.AddVolumeToScene();
+            SWEditor.BattleSceneSetup.CreateVolumeProfile();
+            SWEditor.BattleSceneSetup.AddVolumeToScene();
             
             var volume = Object.FindFirstObjectByType<Volume>();
             
@@ -329,7 +331,7 @@ namespace ShieldWall.Tests.Editor
         {
             Assert.IsFalse(File.Exists(VolumeProfilePath), "Profile should not exist before test");
             
-            ShieldWall.Editor.BattleSceneSetup.AddVolumeToScene();
+            SWEditor.BattleSceneSetup.AddVolumeToScene();
             
             Assert.IsTrue(File.Exists(VolumeProfilePath), "Profile should be created automatically");
         }

@@ -8,9 +8,14 @@ namespace ShieldWall.Audio
     {
         private AudioSource _sourceA;
         private AudioSource _sourceB;
-        private AudioSource _activeSource;
         private AudioMixerGroup _mixerGroup;
+        private bool _isSourceAActive = true;
         private Coroutine _crossfadeCoroutine;
+
+        public AudioClip CurrentClip => ActiveSource.clip;
+        public bool IsPlaying => ActiveSource.isPlaying;
+        private AudioSource ActiveSource => _isSourceAActive ? _sourceA : _sourceB;
+        private AudioSource InactiveSource => _isSourceAActive ? _sourceB : _sourceA;
 
         public void Initialize(AudioMixerGroup mixerGroup)
         {
@@ -22,90 +27,92 @@ namespace ShieldWall.Audio
         {
             _sourceA = gameObject.AddComponent<AudioSource>();
             _sourceA.outputAudioMixerGroup = _mixerGroup;
-            _sourceA.playOnAwake = false;
             _sourceA.loop = true;
-            _sourceA.spatialBlend = 0f;
+            _sourceA.playOnAwake = false;
 
             _sourceB = gameObject.AddComponent<AudioSource>();
             _sourceB.outputAudioMixerGroup = _mixerGroup;
-            _sourceB.playOnAwake = false;
             _sourceB.loop = true;
-            _sourceB.spatialBlend = 0f;
-
-            _activeSource = _sourceA;
+            _sourceB.playOnAwake = false;
+            _sourceB.volume = 0f;
         }
 
         public void Play(AudioClip clip)
         {
             if (clip == null) return;
 
-            if (_activeSource.clip == clip && _activeSource.isPlaying)
+            if (ActiveSource.clip == clip && ActiveSource.isPlaying)
                 return;
 
-            _activeSource.clip = clip;
-            _activeSource.volume = 1f;
-            _activeSource.Play();
+            StopCrossfade();
+
+            ActiveSource.clip = clip;
+            ActiveSource.volume = 1f;
+            ActiveSource.Play();
         }
 
         public void Stop()
+        {
+            StopCrossfade();
+            _sourceA?.Stop();
+            _sourceB?.Stop();
+        }
+
+        public void CrossfadeTo(AudioClip clip, float duration = 1f)
+        {
+            if (clip == null) return;
+
+            if (ActiveSource.clip == clip && ActiveSource.isPlaying)
+                return;
+
+            StopCrossfade();
+            _crossfadeCoroutine = StartCoroutine(CrossfadeCoroutine(clip, duration));
+        }
+
+        private void StopCrossfade()
         {
             if (_crossfadeCoroutine != null)
             {
                 StopCoroutine(_crossfadeCoroutine);
                 _crossfadeCoroutine = null;
             }
-
-            _sourceA.Stop();
-            _sourceB.Stop();
-        }
-
-        public void CrossfadeTo(AudioClip clip, float duration)
-        {
-            if (clip == null) return;
-
-            if (_activeSource.clip == clip && _activeSource.isPlaying)
-                return;
-
-            if (_crossfadeCoroutine != null)
-            {
-                StopCoroutine(_crossfadeCoroutine);
-            }
-
-            _crossfadeCoroutine = StartCoroutine(CrossfadeCoroutine(clip, duration));
         }
 
         private IEnumerator CrossfadeCoroutine(AudioClip newClip, float duration)
         {
-            AudioSource fadeOutSource = _activeSource;
-            AudioSource fadeInSource = _activeSource == _sourceA ? _sourceB : _sourceA;
+            var fadeOut = ActiveSource;
+            var fadeIn = InactiveSource;
 
-            fadeInSource.clip = newClip;
-            fadeInSource.volume = 0f;
-            fadeInSource.Play();
+            fadeIn.clip = newClip;
+            fadeIn.volume = 0f;
+            fadeIn.Play();
 
             float elapsed = 0f;
-            float startVolume = fadeOutSource.volume;
+            float startVolume = fadeOut.volume;
 
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
                 float t = elapsed / duration;
 
-                fadeOutSource.volume = Mathf.Lerp(startVolume, 0f, t);
-                fadeInSource.volume = Mathf.Lerp(0f, 1f, t);
+                fadeOut.volume = Mathf.Lerp(startVolume, 0f, t);
+                fadeIn.volume = Mathf.Lerp(0f, 1f, t);
 
                 yield return null;
             }
 
-            fadeOutSource.Stop();
-            fadeOutSource.volume = 0f;
-            fadeInSource.volume = 1f;
+            fadeOut.Stop();
+            fadeOut.volume = 0f;
+            fadeIn.volume = 1f;
 
-            _activeSource = fadeInSource;
+            _isSourceAActive = !_isSourceAActive;
             _crossfadeCoroutine = null;
         }
 
-        public bool IsPlaying => _activeSource != null && _activeSource.isPlaying;
+        public void SetVolume(float volume)
+        {
+            if (_sourceA != null) _sourceA.volume = volume;
+            if (_sourceB != null) _sourceB.volume = _sourceB.isPlaying ? volume : 0f;
+        }
     }
 }
-

@@ -6,13 +6,14 @@ using System.IO;
 
 namespace ShieldWall.Editor
 {
+    [System.Obsolete("Use ShieldWallSceneBuilder instead. This class is deprecated and will be removed in a future version.")]
     public static class ScenarioWaveGenerator
     {
         private const string WavesPath = "Assets/ScriptableObjects/Waves";
         private const string ScenariosPath = "Assets/ScriptableObjects/Scenarios";
         private const string EnemiesPath = "Assets/ScriptableObjects/Enemies";
 
-        [MenuItem("Shield Wall/Content/Generate All Scenarios and Waves")]
+        // [MenuItem("Shield Wall/Content/Generate All Scenarios and Waves")]
         public static void GenerateAll()
         {
             EnsureDirectoriesExist();
@@ -26,7 +27,7 @@ namespace ShieldWall.Editor
             Debug.Log("Track C: All scenarios and waves generated successfully!");
         }
 
-        [MenuItem("Shield Wall/Content/Generate Easy Waves Only")]
+        // [MenuItem("Shield Wall/Content/Generate Easy Waves Only")]
         public static void GenerateEasyWaves()
         {
             EnsureDirectoriesExist();
@@ -59,7 +60,7 @@ namespace ShieldWall.Editor
             Debug.Log("Easy waves generated: Wave_Easy_01, Wave_Easy_02, Wave_Easy_03");
         }
 
-        [MenuItem("Shield Wall/Content/Generate Hard Waves Only")]
+        // [MenuItem("Shield Wall/Content/Generate Hard Waves Only")]
         public static void GenerateHardWaves()
         {
             EnsureDirectoriesExist();
@@ -99,7 +100,7 @@ namespace ShieldWall.Editor
             Debug.Log("Hard waves generated: Wave_Hard_01, Wave_Hard_02, Wave_Hard_03, Wave_Hard_04");
         }
 
-        [MenuItem("Shield Wall/Content/Generate Scenarios Only")]
+        // [MenuItem("Shield Wall/Content/Generate Scenarios Only")]
         public static void GenerateScenarios()
         {
             EnsureDirectoriesExist();

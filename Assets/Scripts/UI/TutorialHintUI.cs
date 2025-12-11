@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using ShieldWall.Data;
+using ShieldWall.Tutorial;
 
 namespace ShieldWall.UI
 {
@@ -83,7 +84,7 @@ namespace ShieldWall.UI
 
         private void OnDismissClicked()
         {
-            Tutorial.TutorialManager.Instance?.DismissCurrentHint();
+            TutorialManager.Instance?.DismissCurrentHint();
         }
     }
 }

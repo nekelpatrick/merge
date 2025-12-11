@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Testing deprecated class until removed
 using NUnit.Framework;
 using UnityEngine;
 using UnityEditor;
@@ -5,6 +6,7 @@ using ShieldWall.Data;
 using ShieldWall.Core;
 using System.Collections.Generic;
 using System.IO;
+using SWEditor = ShieldWall.Editor;
 
 namespace ShieldWall.Tests.Editor
 {
@@ -304,7 +306,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void GenerateEasyWaves_CreatesThreeWaves()
         {
-            ShieldWall.Editor.ScenarioWaveGenerator.GenerateEasyWaves();
+            SWEditor.ScenarioWaveGenerator.GenerateEasyWaves();
             AssetDatabase.Refresh();
 
             var wave1 = AssetDatabase.LoadAssetAtPath<WaveConfigSO>($"{WavesPath}/Wave_Easy_01.asset");
@@ -330,7 +332,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void GenerateHardWaves_CreatesFourWaves()
         {
-            ShieldWall.Editor.ScenarioWaveGenerator.GenerateHardWaves();
+            SWEditor.ScenarioWaveGenerator.GenerateHardWaves();
             AssetDatabase.Refresh();
 
             var wave1 = AssetDatabase.LoadAssetAtPath<WaveConfigSO>($"{WavesPath}/Wave_Hard_01.asset");
@@ -352,9 +354,9 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void GenerateScenarios_CreatesThreeScenarios()
         {
-            ShieldWall.Editor.ScenarioWaveGenerator.GenerateEasyWaves();
-            ShieldWall.Editor.ScenarioWaveGenerator.GenerateHardWaves();
-            ShieldWall.Editor.ScenarioWaveGenerator.GenerateScenarios();
+            SWEditor.ScenarioWaveGenerator.GenerateEasyWaves();
+            SWEditor.ScenarioWaveGenerator.GenerateHardWaves();
+            SWEditor.ScenarioWaveGenerator.GenerateScenarios();
             AssetDatabase.Refresh();
 
             var theBreach = AssetDatabase.LoadAssetAtPath<BattleScenarioSO>($"{ScenariosPath}/Scenario_TheBreach.asset");
@@ -400,8 +402,8 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void TheBreach_HasCorrectWaveCount()
         {
-            ShieldWall.Editor.ScenarioWaveGenerator.GenerateEasyWaves();
-            ShieldWall.Editor.ScenarioWaveGenerator.GenerateScenarios();
+            SWEditor.ScenarioWaveGenerator.GenerateEasyWaves();
+            SWEditor.ScenarioWaveGenerator.GenerateScenarios();
             AssetDatabase.Refresh();
 
             var theBreach = AssetDatabase.LoadAssetAtPath<BattleScenarioSO>($"{ScenariosPath}/Scenario_TheBreach.asset");
@@ -420,7 +422,7 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void HoldTheLine_HasCorrectWaveCount()
         {
-            ShieldWall.Editor.ScenarioWaveGenerator.GenerateScenarios();
+            SWEditor.ScenarioWaveGenerator.GenerateScenarios();
             AssetDatabase.Refresh();
 
             var holdTheLine = AssetDatabase.LoadAssetAtPath<BattleScenarioSO>($"{ScenariosPath}/Scenario_HoldTheLine.asset");
@@ -436,9 +438,9 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void TheLastStand_HasCorrectWaveCount()
         {
-            ShieldWall.Editor.ScenarioWaveGenerator.GenerateEasyWaves();
-            ShieldWall.Editor.ScenarioWaveGenerator.GenerateHardWaves();
-            ShieldWall.Editor.ScenarioWaveGenerator.GenerateScenarios();
+            SWEditor.ScenarioWaveGenerator.GenerateEasyWaves();
+            SWEditor.ScenarioWaveGenerator.GenerateHardWaves();
+            SWEditor.ScenarioWaveGenerator.GenerateScenarios();
             AssetDatabase.Refresh();
 
             var theLastStand = AssetDatabase.LoadAssetAtPath<BattleScenarioSO>($"{ScenariosPath}/Scenario_TheLastStand.asset");

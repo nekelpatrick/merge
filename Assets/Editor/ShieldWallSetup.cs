@@ -11,6 +11,7 @@ using System.IO;
 
 namespace ShieldWall.Editor
 {
+    [System.Obsolete("Use ShieldWallSceneBuilder instead. This class is deprecated and will be removed in a future version.")]
     [InitializeOnLoad]
     public static class ShieldWallSetup
     {
@@ -45,7 +46,7 @@ namespace ShieldWall.Editor
             }
         }
 
-        [MenuItem("Shield Wall/Setup/Run Complete Setup")]
+        // [MenuItem("Shield Wall/Setup/Run Complete Setup")]
         public static void RunCompleteSetup()
         {
             CreateAllPlaceholderAssets();
@@ -54,7 +55,7 @@ namespace ShieldWall.Editor
             Debug.Log("Shield Wall: Complete setup finished!");
         }
 
-        [MenuItem("Shield Wall/Setup/Setup Battle Managers")]
+        // [MenuItem("Shield Wall/Setup/Setup Battle Managers")]
         public static void SetupBattleManagers()
         {
             var scene = EditorSceneManager.OpenScene("Assets/Scenes/Battle.unity");
@@ -105,7 +106,7 @@ namespace ShieldWall.Editor
             return go.AddComponent<T>();
         }
 
-        [MenuItem("Shield Wall/Setup/Create All Placeholder Assets")]
+        // [MenuItem("Shield Wall/Setup/Create All Placeholder Assets")]
         public static void CreateAllPlaceholderAssets()
         {
             CreateRuneAssets();
@@ -128,7 +129,7 @@ namespace ShieldWall.Editor
             Debug.Log("Shield Wall: All placeholder assets created successfully!");
         }
 
-        [MenuItem("Shield Wall/Setup/Setup Battle Scene")]
+        // [MenuItem("Shield Wall/Setup/Setup Battle Scene")]
         public static void SetupBattleScene()
         {
             var scene = EditorSceneManager.OpenScene("Assets/Scenes/Battle.unity");
@@ -206,7 +207,7 @@ namespace ShieldWall.Editor
             ground.transform.localScale = new Vector3(10f, 1f, 10f);
         }
 
-        [MenuItem("Shield Wall/Setup/Create Rune Assets")]
+        // [MenuItem("Shield Wall/Setup/Create Rune Assets")]
         public static void CreateRuneAssets()
         {
             CreateRune(RuneType.Thurs, "Shield", new Color(0.36f, 0.36f, 0.36f), "Defense rune - protects against attacks");
@@ -219,7 +220,7 @@ namespace ShieldWall.Editor
             Debug.Log("Shield Wall: Rune assets created");
         }
 
-        [MenuItem("Shield Wall/Setup/Create Brother Assets")]
+        // [MenuItem("Shield Wall/Setup/Create Brother Assets")]
         public static void CreateBrotherAssets()
         {
             CreateBrother("Bjorn", "+block power");
@@ -230,7 +231,7 @@ namespace ShieldWall.Editor
             Debug.Log("Shield Wall: Brother assets created");
         }
 
-        [MenuItem("Shield Wall/Setup/Create Enemy Assets")]
+        // [MenuItem("Shield Wall/Setup/Create Enemy Assets")]
         public static void CreateEnemyAssets()
         {
             CreateEnemy("Thrall", 1, 1, EnemyTargetingType.Random, false, false, new Color(0.5f, 0.5f, 0.5f));
@@ -243,7 +244,7 @@ namespace ShieldWall.Editor
             Debug.Log("Shield Wall: Enemy assets created");
         }
 
-        [MenuItem("Shield Wall/Setup/Create Action Assets")]
+        // [MenuItem("Shield Wall/Setup/Create Action Assets")]
         public static void CreateActionAssets()
         {
             CreateAction("Block", new[] { RuneType.Thurs, RuneType.Thurs }, ActionEffectType.Block, 1, "Negate 1 attack on you");
@@ -260,7 +261,7 @@ namespace ShieldWall.Editor
             Debug.Log("Shield Wall: Action assets created");
         }
 
-        [MenuItem("Shield Wall/Setup/Create Wave Assets")]
+        // [MenuItem("Shield Wall/Setup/Create Wave Assets")]
         public static void CreateWaveAssets()
         {
             var thrall = AssetDatabase.LoadAssetAtPath<EnemySO>("Assets/ScriptableObjects/Enemies/Enemy_Thrall.asset");
@@ -404,7 +405,7 @@ namespace ShieldWall.Editor
             }
         }
 
-        [MenuItem("ShieldWall/Create Assets/Create Scenario Assets")]
+        // [MenuItem("ShieldWall/Create Assets/Create Scenario Assets")]
         public static void CreateScenarioAssets()
         {
             string path = "Assets/ScriptableObjects/Scenarios";
@@ -484,7 +485,7 @@ namespace ShieldWall.Editor
             return scenario;
         }
 
-        [MenuItem("ShieldWall/Create Assets/Create Tutorial Hint Assets")]
+        // [MenuItem("ShieldWall/Create Assets/Create Tutorial Hint Assets")]
         public static void CreateTutorialHintAssets()
         {
             string path = "Assets/ScriptableObjects/Tutorial";
@@ -547,7 +548,7 @@ namespace ShieldWall.Editor
             AssetDatabase.CreateAsset(hint, assetPath);
         }
 
-        [MenuItem("ShieldWall/Create Assets/Create Easy Wave Assets")]
+        // [MenuItem("ShieldWall/Create Assets/Create Easy Wave Assets")]
         public static void CreateEasyWaveAssets()
         {
             string path = "Assets/ScriptableObjects/Waves";
@@ -582,7 +583,7 @@ namespace ShieldWall.Editor
             Debug.Log("Shield Wall: Created 3 easy wave assets in " + path);
         }
 
-        [MenuItem("ShieldWall/Create Assets/Create Hard Wave Assets")]
+        // [MenuItem("ShieldWall/Create Assets/Create Hard Wave Assets")]
         public static void CreateHardWaveAssets()
         {
             string path = "Assets/ScriptableObjects/Waves";
@@ -649,7 +650,7 @@ namespace ShieldWall.Editor
             AssetDatabase.CreateAsset(wave, assetPath);
         }
 
-        [MenuItem("ShieldWall/Create Assets/Create All Phase 3 Assets")]
+        // [MenuItem("ShieldWall/Create Assets/Create All Phase 3 Assets")]
         public static void CreateAllPhase3Assets()
         {
             CreateEasyWaveAssets();

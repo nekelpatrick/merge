@@ -3,7 +3,11 @@
     "rootNamespace": "ShieldWall.Tests.Editor",
     "references": [
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "ShieldWall.Runtime",
+        "ShieldWall.Editor",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime"
     ],
     "includePlatforms": [
         "Editor"

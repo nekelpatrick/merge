@@ -14,6 +14,7 @@ using ShieldWall.Data;
 
 namespace ShieldWall.Editor
 {
+    [System.Obsolete("Use ShieldWallSceneBuilder instead. This class is deprecated and will be removed in a future version.")]
     public static class BattleSceneSetup
     {
         private static BattleManager _battleManager;
@@ -35,7 +36,7 @@ namespace ShieldWall.Editor
         private static WaveUI _waveUI;
         private static GameOverUI _gameOverUI;
 
-        [MenuItem("Shield Wall/Setup/Build Complete Battle Scene")]
+        // [MenuItem("Shield Wall/Setup/Build Complete Battle Scene")]
         public static void BuildCompleteBattleScene()
         {
             var scene = EditorSceneManager.OpenScene("Assets/Scenes/Battle.unity");
@@ -61,7 +62,7 @@ namespace ShieldWall.Editor
             Debug.Log("Battle scene setup complete! Press Play to test.");
         }
 
-        [MenuItem("Shield Wall/Setup/Create First Person Arms")]
+        // [MenuItem("Shield Wall/Setup/Create First Person Arms")]
         public static void CreateFirstPersonArms()
         {
             var existing = GameObject.Find("PlayerArms");
@@ -107,7 +108,7 @@ namespace ShieldWall.Editor
             Debug.Log("First-person arms created. Assign to PlayerView layer (6).");
         }
 
-        [MenuItem("Shield Wall/Setup/Create Enemy Visuals")]
+        // [MenuItem("Shield Wall/Setup/Create Enemy Visuals")]
         public static void CreateEnemyVisuals()
         {
             var existing = GameObject.Find("EnemySpawnPoint");
@@ -141,7 +142,7 @@ namespace ShieldWall.Editor
             Debug.Log("Enemy visual placeholders created.");
         }
 
-        [MenuItem("Shield Wall/Setup/1. Create Manager Hierarchy")]
+        // [MenuItem("Shield Wall/Setup/1. Create Manager Hierarchy")]
         public static void CreateManagerHierarchy()
         {
             var gameManagerGO = CreateOrFind("GameManager");
@@ -166,7 +167,7 @@ namespace ShieldWall.Editor
             Debug.Log("Manager hierarchy created.");
         }
 
-        [MenuItem("Shield Wall/Setup/2. Create UI Prefabs")]
+        // [MenuItem("Shield Wall/Setup/2. Create UI Prefabs")]
         public static void CreateUIPrefabs()
         {
             CreateDieVisualPrefab();
@@ -311,7 +312,7 @@ namespace ShieldWall.Editor
             Object.DestroyImmediate(go);
         }
 
-        [MenuItem("Shield Wall/Setup/3. Create Canvas Hierarchy")]
+        // [MenuItem("Shield Wall/Setup/3. Create Canvas Hierarchy")]
         public static void CreateCanvasHierarchy()
         {
             var existingCanvas = Object.FindFirstObjectByType<Canvas>();
@@ -697,7 +698,7 @@ namespace ShieldWall.Editor
             SetPrivateField(_gameOverUI, "_defeatRestartButton", defeatRestartBtn.GetComponent<Button>());
         }
 
-        [MenuItem("Shield Wall/Setup/4. Wire Manager References")]
+        // [MenuItem("Shield Wall/Setup/4. Wire Manager References")]
         public static void WireManagerReferences()
         {
             _battleManager = Object.FindFirstObjectByType<BattleManager>();
@@ -764,7 +765,7 @@ namespace ShieldWall.Editor
             Debug.Log("Manager references wired.");
         }
 
-        [MenuItem("Shield Wall/Setup/5. Assign ScriptableObjects")]
+        // [MenuItem("Shield Wall/Setup/5. Assign ScriptableObjects")]
         public static void AssignScriptableObjects()
         {
             _comboManager = Object.FindFirstObjectByType<ComboManager>();
@@ -804,7 +805,7 @@ namespace ShieldWall.Editor
             Debug.Log("ScriptableObject assets assigned.");
         }
 
-        [MenuItem("Shield Wall/Scene Setup/Create Volume Profile")]
+        // [MenuItem("Shield Wall/Scene Setup/Create Volume Profile")]
         public static void CreateVolumeProfile()
         {
             string profilePath = "Assets/Settings/BattleVolumeProfile.asset";
@@ -875,7 +876,7 @@ namespace ShieldWall.Editor
             }
         }
 
-        [MenuItem("Shield Wall/Scene Setup/Setup Battle Lighting")]
+        // [MenuItem("Shield Wall/Scene Setup/Setup Battle Lighting")]
         public static void SetupBattleLighting()
         {
             var sun = Object.FindFirstObjectByType<Light>();
@@ -898,7 +899,7 @@ namespace ShieldWall.Editor
             Debug.Log("Battle lighting configured: Directional light and ambient settings applied.");
         }
 
-        [MenuItem("Shield Wall/Scene Setup/Create Ground Plane")]
+        // [MenuItem("Shield Wall/Scene Setup/Create Ground Plane")]
         public static void CreateGroundPlane()
         {
             string materialPath = "Assets/Art/Materials/Environment/Ground.mat";
@@ -944,7 +945,7 @@ namespace ShieldWall.Editor
             Debug.Log("Ground plane created with mud brown material.");
         }
 
-        [MenuItem("Shield Wall/Scene Setup/Setup Layers")]
+        // [MenuItem("Shield Wall/Scene Setup/Setup Layers")]
         public static void SetupLayers()
         {
             SerializedObject tagManager = new SerializedObject(
@@ -975,7 +976,7 @@ namespace ShieldWall.Editor
             }
         }
 
-        [MenuItem("Shield Wall/Scene Setup/Add Volume to Scene")]
+        // [MenuItem("Shield Wall/Scene Setup/Add Volume to Scene")]
         public static void AddVolumeToScene()
         {
             string profilePath = "Assets/Settings/BattleVolumeProfile.asset";
@@ -1003,7 +1004,7 @@ namespace ShieldWall.Editor
             Debug.Log("Post-process Volume added to scene with BattleVolumeProfile.");
         }
 
-        [MenuItem("Shield Wall/Scene Setup/Apply Full Atmosphere")]
+        // [MenuItem("Shield Wall/Scene Setup/Apply Full Atmosphere")]
         public static void ApplyFullAtmosphere()
         {
             var scene = EditorSceneManager.GetActiveScene();
@@ -1109,6 +1110,220 @@ namespace ShieldWall.Editor
             }
             
             return assets;
+        }
+
+        // [MenuItem("ShieldWall/Scene Setup/Create Volume Profile")]
+        public static void CreateVolumeProfileNew()
+        {
+            string path = "Assets/Settings/BattleVolumeProfile.asset";
+            EnsureDirectoryExistsForPath(path);
+
+            var existing = AssetDatabase.LoadAssetAtPath<VolumeProfile>(path);
+            if (existing != null)
+            {
+                Debug.Log("Shield Wall: BattleVolumeProfile already exists at " + path);
+                return;
+            }
+
+            var profile = ScriptableObject.CreateInstance<VolumeProfile>();
+
+            var colorGrading = profile.Add<ColorAdjustments>(true);
+            colorGrading.saturation.Override(-15f);
+            colorGrading.contrast.Override(10f);
+
+            var vignette = profile.Add<Vignette>(true);
+            vignette.intensity.Override(0.25f);
+            vignette.smoothness.Override(0.4f);
+            vignette.color.Override(new Color(0.16f, 0.09f, 0.06f));
+
+            var bloom = profile.Add<Bloom>(true);
+            bloom.intensity.Override(0.5f);
+            bloom.threshold.Override(1f);
+            bloom.scatter.Override(0.6f);
+
+            var grain = profile.Add<FilmGrain>(true);
+            grain.type.Override(FilmGrainLookup.Medium1);
+            grain.intensity.Override(0.1f);
+
+            AssetDatabase.CreateAsset(profile, path);
+            AssetDatabase.SaveAssets();
+
+            Debug.Log("Shield Wall: Created Volume Profile at " + path);
+        }
+
+        // [MenuItem("ShieldWall/Scene Setup/Setup Battle Lighting")]
+        public static void SetupBattleLightingNew()
+        {
+            var sun = GameObject.Find("Directional Light");
+            if (sun == null)
+            {
+                sun = new GameObject("Directional Light");
+                sun.AddComponent<Light>();
+            }
+
+            var light = sun.GetComponent<Light>();
+            light.type = LightType.Directional;
+            light.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+            light.intensity = 0.8f;
+            light.color = new Color(1f, 0.91f, 0.82f);
+            light.shadows = LightShadows.Soft;
+            light.shadowStrength = 0.6f;
+
+            RenderSettings.ambientMode = AmbientMode.Flat;
+            RenderSettings.ambientLight = new Color(0.1f, 0.1f, 0.1f);
+            RenderSettings.ambientIntensity = 0.3f;
+
+            Debug.Log("Shield Wall: Battle lighting configured");
+        }
+
+        // [MenuItem("ShieldWall/Scene Setup/Create Ground Plane")]
+        public static void CreateGroundPlaneNew()
+        {
+            var existing = GameObject.Find("Ground");
+            if (existing != null)
+            {
+                Debug.LogWarning("Shield Wall: Ground already exists. Delete it first to recreate.");
+                return;
+            }
+
+            var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            ground.name = "Ground";
+            ground.transform.position = Vector3.zero;
+            ground.transform.localScale = new Vector3(5f, 1f, 5f);
+
+            string matPath = "Assets/Art/Materials/Ground.mat";
+            EnsureDirectoryExistsForPath(matPath);
+
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(matPath);
+            if (mat == null)
+            {
+                mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                mat.color = new Color(0.29f, 0.22f, 0.16f);
+                mat.SetFloat("_Smoothness", 0.1f);
+                mat.SetFloat("_Metallic", 0f);
+                AssetDatabase.CreateAsset(mat, matPath);
+            }
+
+            ground.GetComponent<Renderer>().material = mat;
+
+            Debug.Log("Shield Wall: Ground plane created");
+        }
+
+        // [MenuItem("ShieldWall/Scene Setup/Add Volume to Scene")]
+        public static void AddVolumeToSceneNew()
+        {
+            var volumeObj = GameObject.Find("Global Volume");
+            if (volumeObj == null)
+            {
+                volumeObj = new GameObject("Global Volume");
+            }
+
+            var volume = volumeObj.GetComponent<Volume>();
+            if (volume == null)
+                volume = volumeObj.AddComponent<Volume>();
+
+            volume.isGlobal = true;
+
+            var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>("Assets/Settings/BattleVolumeProfile.asset");
+            if (profile != null)
+            {
+                volume.profile = profile;
+                Debug.Log("Shield Wall: Volume added with BattleVolumeProfile");
+            }
+            else
+            {
+                Debug.LogWarning("Shield Wall: BattleVolumeProfile not found. Create it first.");
+            }
+        }
+
+        // [MenuItem("ShieldWall/Scene Setup/Setup Layers")]
+        public static void SetupLayersNew()
+        {
+            SerializedObject tagManager = new SerializedObject(
+                AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+            SerializedProperty layers = tagManager.FindProperty("layers");
+
+            SetLayerNameNew(layers, 6, "PlayerView");
+            SetLayerNameNew(layers, 7, "Brothers");
+            SetLayerNameNew(layers, 8, "Enemies");
+            SetLayerNameNew(layers, 9, "Environment");
+
+            tagManager.ApplyModifiedProperties();
+
+            Debug.Log("Shield Wall: Layers configured: PlayerView(6), Brothers(7), Enemies(8), Environment(9)");
+        }
+
+        private static void SetLayerNameNew(SerializedProperty layers, int index, string name)
+        {
+            var layer = layers.GetArrayElementAtIndex(index);
+            if (string.IsNullOrEmpty(layer.stringValue))
+                layer.stringValue = name;
+        }
+
+        // [MenuItem("ShieldWall/Scene Setup/Setup Fog")]
+        public static void SetupFog()
+        {
+            RenderSettings.fog = true;
+            RenderSettings.fogMode = FogMode.Linear;
+            RenderSettings.fogStartDistance = 10f;
+            RenderSettings.fogEndDistance = 50f;
+            RenderSettings.fogColor = new Color(0.1f, 0.1f, 0.12f);
+
+            Debug.Log("Shield Wall: Fog configured");
+        }
+
+        // [MenuItem("ShieldWall/Scene Setup/Apply Full Atmosphere")]
+        public static void ApplyFullAtmosphereNew()
+        {
+            CreateVolumeProfileNew();
+            SetupBattleLightingNew();
+            CreateGroundPlaneNew();
+            AddVolumeToSceneNew();
+            SetupLayersNew();
+            SetupFog();
+
+            Debug.Log("=== Shield Wall: Full battle atmosphere applied! ===");
+        }
+
+        // [MenuItem("ShieldWall/Scene Setup/Create Visual Spawn Markers")]
+        public static void CreateVisualSpawnMarkers()
+        {
+            var existingSpawn = GameObject.Find("EnemySpawnArea");
+            if (existingSpawn == null)
+            {
+                var enemySpawn = new GameObject("EnemySpawnArea");
+                enemySpawn.transform.position = new Vector3(0, 1, 7);
+            }
+
+            CreateMarkerIfMissing("BrotherPos_FarLeft", new Vector3(-3, 0, 1));
+            CreateMarkerIfMissing("BrotherPos_Left", new Vector3(-1.5f, 0, 1));
+            CreateMarkerIfMissing("BrotherPos_Right", new Vector3(1.5f, 0, 1));
+            CreateMarkerIfMissing("BrotherPos_FarRight", new Vector3(3, 0, 1));
+
+            Debug.Log("Shield Wall: Visual spawn markers created");
+        }
+
+        private static void CreateMarkerIfMissing(string name, Vector3 position)
+        {
+            if (GameObject.Find(name) == null)
+            {
+                var marker = new GameObject(name);
+                marker.transform.position = position;
+            }
+        }
+
+        private static void EnsureDirectoryExistsForPath(string filePath)
+        {
+            string directory = System.IO.Path.GetDirectoryName(filePath).Replace("\\", "/");
+            if (!AssetDatabase.IsValidFolder(directory))
+            {
+                string parent = System.IO.Path.GetDirectoryName(directory).Replace("\\", "/");
+                string folder = System.IO.Path.GetFileName(directory);
+                if (!string.IsNullOrEmpty(parent) && !string.IsNullOrEmpty(folder))
+                {
+                    AssetDatabase.CreateFolder(parent, folder);
+                }
+            }
         }
     }
 }

@@ -77,6 +77,11 @@ ehthumbs.db
 Thumbs.db
 Desktop.ini
 
+# Test log files
+[Tt]est[Ll]og.txt
+test_log.txt
+*_log.txt
+
 # Recordings (optional large files)
 [Rr]ecordings/
 

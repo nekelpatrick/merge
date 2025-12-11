@@ -1,0 +1,231 @@
+---
+description: Phase-Track Planning Methodology - ALWAYS plan features using the track documentation system
+alwaysApply: true
+---
+
+# Phase-Track Planning Methodology
+
+## MANDATORY: Before implementing ANY feature or change, you MUST:
+
+1. **Check existing Track Prompts** in `Assets/Documentation/TrackPrompts/`
+2. **Identify which track owns the files** you need to modify
+3. **Follow the track's defined scope and constraints**
+4. **Plan work according to the Phase-Track-Agent model**
+
+---
+
+## Track Documentation Reference
+
+Before starting work, ALWAYS read the relevant track prompt:
+
+| Track | File | Domain |
+|-------|------|--------|
+| A | `Phase3_TrackA_VisualPrimitives.md` | 3D visuals, VFX, primitives |
+| B | `Phase3_TrackB_SceneAtmosphere.md` | Lighting, fog, post-processing, ground |
+| C | `Phase3_TrackC_BattleScenarios.md` | Scenarios, waves, difficulty |
+| D | `Phase3_TrackD_Audio.md` | Sound effects, music, AudioManager |
+| E | `Phase3_TrackE_Tutorial.md` | Tutorial hints, onboarding |
+| F | `Phase3_TrackF_Menus.md` | MainMenu, pause, scene loading |
+| G | `Phase3_TrackG_EditorAutomation.md` | Editor scripts, setup automation |
+
+---
+
+## Planning Rules
+
+### 1. ALWAYS Identify Track Ownership First
+
+Before modifying ANY file, determine which track owns it:
+
+```
+Scripts/Visual/*        → Track A
+Scripts/Audio/*         → Track D  
+Scripts/Tutorial/*      → Track E
+Scripts/UI/Menu*.cs     → Track F
+Scripts/UI/Tutorial*.cs → Track E
+Scripts/Data/*Scenario* → Track C
+Scripts/Data/*Wave*     → Track C
+Editor/*Setup*.cs       → Track G
+ScriptableObjects/Scenarios/* → Track C
+ScriptableObjects/Waves/*     → Track C
+ScriptableObjects/Tutorial/*  → Track E
+Scenes/MainMenu*        → Track F
+Art/Materials/*         → Track B
+Settings/*Volume*       → Track B
+```
+
+### 2. NEVER Cross Track Boundaries Without Justification
+
+- If you need to modify files from MULTIPLE tracks, you MUST:
+  1. Explicitly state which tracks are affected
+  2. Explain why cross-track modification is necessary
+  3. Prefer using `GameEvents` for cross-track communication
+
+### 3. Follow Track Prompt Structure
+
+Each track prompt contains:
+- **Scope** - Exact files to create/modify
+- **Success Criteria** - What must work when complete
+- **Constraints** - What NOT to touch
+- **Dependencies** - What must exist before starting
+- **Test Steps** - How to verify it works
+
+### 4. Plan BEFORE Implementing
+
+When the user asks for a new feature or change:
+
+```markdown
+## Planning Phase
+
+1. **Feature Analysis**
+   - What is being requested?
+   - Which tracks does this affect?
+
+2. **Track Identification**
+   - Primary track: [A-G]
+   - Secondary tracks (if any): [list]
+
+3. **File Scope**
+   - Files to create: [list]
+   - Files to modify: [list]
+   - Files NOT to touch: [list]
+
+4. **Implementation Order**
+   - Step 1: [task]
+   - Step 2: [task]
+   ...
+
+5. **Success Criteria**
+   - [ ] Criterion 1
+   - [ ] Criterion 2
+```
+
+---
+
+## Integration Points
+
+All tracks communicate via `GameEvents.cs`. NEVER add direct references between track systems.
+
+### Available Events (use these for cross-track communication):
+
+```csharp
+// Dice System
+OnDiceRolled, OnDieLockToggled, OnAvailableActionsChanged
+
+// Combat  
+OnEnemyWaveSpawned, OnEnemyKilled, OnAttackBlocked, OnAttackLanded
+
+// Shield Wall
+OnBrotherWounded, OnBrotherDied, OnWallIntegrityChanged
+
+// Player
+OnStaminaChanged, OnPlayerWounded
+
+// Turn Flow
+OnPhaseChanged, OnWaveStarted, OnWaveCleared, OnBattleEnded
+```
+
+---
+
+## When Creating NEW Features
+
+If a feature doesn't fit existing tracks:
+
+1. **Check if it's an extension of existing track** → Add to that track
+2. **Check if it's truly new domain** → Create new track prompt
+3. **Document the new track** in `Assets/Documentation/TrackPrompts/`
+
+### New Track Prompt Template
+
+```markdown
+# Phase N: Track [X] - [Name]
+
+## Overview
+[What this track delivers]
+
+## Scope
+### Files to Create
+- `path/to/file.cs` - Description
+
+### Files to Modify  
+- `path/to/existing.cs` - What changes
+
+### Files NOT to Touch
+- List files owned by other tracks
+
+## Dependencies
+- Requires Track [X] complete
+- Requires [component] to exist
+
+## Implementation Tasks
+### X1: [Task name]
+[Details]
+
+### X2: [Task name]
+[Details]
+
+## Success Criteria
+- [ ] Criterion 1
+- [ ] Criterion 2
+
+## Test Steps
+1. Open [scene]
+2. Press Play
+3. Verify [behavior]
+```
+
+---
+
+## Quick Reference Commands
+
+When asked to implement something, respond with:
+
+1. "Let me check the track documentation..."
+2. Read relevant `Assets/Documentation/TrackPrompts/*.md` file
+3. "This belongs to Track [X]. The track defines [scope]."
+4. Present plan following track structure
+5. Implement according to plan
+
+---
+
+## Examples
+
+### Good: Track-Aware Planning
+
+**User:** "Add screen shake when player takes damage"
+
+**Agent Response:**
+> Let me check the track documentation...
+> 
+> This belongs to **Track A (Visual Primitives)** - specifically `ScreenEffectsController.cs`.
+> 
+> **Plan:**
+> 1. Track A owns `Scripts/Visual/ScreenEffectsController.cs`
+> 2. Subscribe to `GameEvents.OnPlayerWounded`
+> 3. Add `TriggerScreenShake()` method
+> 4. No cross-track files needed
+>
+> **Implementing Track A scope only...**
+
+### Bad: Ignoring Track Ownership
+
+**User:** "Add screen shake when player takes damage"
+
+**Agent Response:**
+> I'll add a screen shake effect...
+> *[Modifies random files without checking track ownership]*
+> *[Creates new file in wrong folder]*
+> *[Adds direct reference instead of using events]*
+
+---
+
+## Enforcement
+
+This rule is **ALWAYS APPLIED**. When planning any feature:
+
+1. ✅ DO read track documentation first
+2. ✅ DO identify track ownership
+3. ✅ DO follow track scope constraints
+4. ✅ DO use GameEvents for cross-track communication
+5. ❌ DON'T modify files outside your track scope
+6. ❌ DON'T skip the planning phase
+7. ❌ DON'T add direct references between track systems
