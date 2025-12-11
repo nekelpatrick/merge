@@ -360,7 +360,35 @@ namespace ShieldWall.Editor
             CreateVisualControllers();
             CreateEnemySpawnPoint();
             CreateBrotherSpawnMarkers();
+            SetupPolishComponents();
             Debug.Log("Battle visuals created");
+        }
+
+        [MenuItem("Shield Wall Builder/Polish/Setup Polish Components", false, 501)]
+        public static void SetupPolishComponents()
+        {
+            var polishGO = CreateOrFind("PolishEffects");
+
+            AddComponent<CameraEffects>(polishGO);
+            AddComponent<TimeController>(polishGO);
+            AddComponent<PostProcessController>(polishGO);
+            AddComponent<ImpactVFXController>(polishGO);
+            AddComponent<HitEmphasis>(polishGO);
+            AddComponent<ScreenEffectsController>(polishGO);
+
+            var audioGO = CreateOrFind("AudioControllers");
+            AddComponent<ShieldWall.Audio.CombatSFXController>(audioGO);
+            AddComponent<ShieldWall.Audio.UISFXController>(audioGO);
+            AddComponent<ShieldWall.Audio.AmbientController>(audioGO);
+
+            var combatGO = CreateOrFind("CombatManager");
+            AddComponent<ShieldWall.Combat.CombatPacer>(combatGO);
+            AddComponent<ShieldWall.Combat.AttackTelegraph>(combatGO);
+
+            var debugGO = CreateOrFind("DebugTools");
+            AddComponent<ShieldWall.Debug.PolishDebugger>(debugGO);
+
+            Debug.Log("Polish components added: CameraEffects, TimeController, PostProcess, ImpactVFX, HitEmphasis, Audio controllers, Combat timing, Debug tools");
         }
 
         [MenuItem("Shield Wall Builder/Battle Scene/Wire All References", false, 204)]
