@@ -126,9 +126,17 @@ namespace ShieldWall.UI
 
         private void HandleDieClicked(int index)
         {
+            Debug.Log($"DiceUI: HandleDieClicked({index}), canInteract={_canInteract}");
             if (!_canInteract) return;
             
-            _dicePoolManager?.ToggleDieLock(index);
+            if (_dicePoolManager == null)
+            {
+                Debug.LogError("DiceUI: DicePoolManager is null!");
+                return;
+            }
+            
+            _dicePoolManager.ToggleDieLock(index);
+            Debug.Log($"DiceUI: Toggled lock on die {index}");
         }
 
         private void HandleRerollClicked()

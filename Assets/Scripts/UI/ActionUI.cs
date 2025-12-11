@@ -31,6 +31,8 @@ namespace ShieldWall.UI
 
         private void HandleAvailableActionsChanged(List<ActionSO> actions)
         {
+            Debug.Log($"ActionUI: Received {actions.Count} available actions");
+            
             _currentActions.Clear();
             _currentActions.AddRange(actions);
             
@@ -50,12 +52,27 @@ namespace ShieldWall.UI
 
         private void RebuildActionButtons()
         {
+            Debug.Log($"ActionUI: Rebuilding buttons for {_currentActions.Count} actions");
+            
+            if (_actionButtonPrefab == null)
+            {
+                Debug.LogError("ActionUI: ActionButton prefab is null!");
+                return;
+            }
+            
+            if (_actionContainer == null)
+            {
+                Debug.LogError("ActionUI: ActionContainer is null!");
+                return;
+            }
+            
             EnsureButtonCount(_currentActions.Count);
             
             for (int i = 0; i < _currentActions.Count; i++)
             {
                 _actionButtons[i].SetAction(_currentActions[i]);
                 _actionButtons[i].gameObject.SetActive(true);
+                Debug.Log($"ActionUI: Showing button for {_currentActions[i].actionName}");
             }
             
             for (int i = _currentActions.Count; i < _actionButtons.Count; i++)

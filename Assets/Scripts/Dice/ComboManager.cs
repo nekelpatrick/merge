@@ -28,6 +28,7 @@ namespace ShieldWall.Dice
 
         private void HandleDieLockToggled(int index, bool isLocked)
         {
+            Debug.Log($"ComboManager: Die {index} lock toggled to {isLocked}");
             RecalculateCombos();
         }
 
@@ -46,7 +47,21 @@ namespace ShieldWall.Dice
             }
 
             var lockedRunes = _dicePoolManager.GetLockedRunes();
+            Debug.Log($"ComboManager: Locked runes = [{string.Join(", ", lockedRunes)}]");
+            
+            if (_allActions == null || _allActions.Length == 0)
+            {
+                Debug.LogWarning("ComboManager: No actions assigned!");
+                return;
+            }
+            
             _currentAvailableActions = ComboResolver.Resolve(lockedRunes, _allActions);
+            Debug.Log($"ComboManager: Found {_currentAvailableActions.Count} available actions");
+            
+            foreach (var action in _currentAvailableActions)
+            {
+                Debug.Log($"  - {action.actionName}");
+            }
             
             GameEvents.RaiseAvailableActionsChanged(_currentAvailableActions);
         }

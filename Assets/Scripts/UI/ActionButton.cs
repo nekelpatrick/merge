@@ -119,13 +119,13 @@ namespace ShieldWall.UI
         {
             return type switch
             {
-                RuneType.Thurs => "ᚦ",
-                RuneType.Tyr => "ᛏ",
-                RuneType.Gebo => "ᚷ",
-                RuneType.Berkana => "ᛒ",
-                RuneType.Othala => "ᛟ",
-                RuneType.Laguz => "ᛚ",
-                _ => "?"
+                RuneType.Thurs => "[SH]",
+                RuneType.Tyr => "[AX]",
+                RuneType.Gebo => "[SP]",
+                RuneType.Berkana => "[BR]",
+                RuneType.Othala => "[OD]",
+                RuneType.Laguz => "[LO]",
+                _ => "[?]"
             };
         }
 

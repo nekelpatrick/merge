@@ -107,6 +107,7 @@ namespace ShieldWall.UI
 
         private void HandleClick()
         {
+            Debug.Log($"DieVisual: Die {_dieIndex} clicked!");
             OnDieClicked?.Invoke(_dieIndex);
         }
 
@@ -114,12 +115,12 @@ namespace ShieldWall.UI
         {
             return type switch
             {
-                RuneType.Thurs => "ᚦ",
-                RuneType.Tyr => "ᛏ",
-                RuneType.Gebo => "ᚷ",
-                RuneType.Berkana => "ᛒ",
-                RuneType.Othala => "ᛟ",
-                RuneType.Laguz => "ᛚ",
+                RuneType.Thurs => "SH",
+                RuneType.Tyr => "AX",
+                RuneType.Gebo => "SP",
+                RuneType.Berkana => "BR",
+                RuneType.Othala => "OD",
+                RuneType.Laguz => "LO",
                 _ => "?"
             };
         }
