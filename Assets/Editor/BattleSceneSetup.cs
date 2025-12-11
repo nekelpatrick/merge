@@ -9,8 +9,6 @@ using ShieldWall.Dice;
 using ShieldWall.ShieldWall;
 using ShieldWall.UI;
 using ShieldWall.Data;
-using ShieldWall.Visual;
-using ShieldWall.Audio;
 
 namespace ShieldWall.Editor
 {
@@ -160,13 +158,6 @@ namespace ShieldWall.Editor
             var shieldWallGO = CreateOrFind("ShieldWall");
             _shieldWallManager = AddComponent<ShieldWallManager>(shieldWallGO);
             _playerWarrior = AddComponent<PlayerWarrior>(shieldWallGO);
-
-            var visualManagerGO = CreateOrFind("VisualManager");
-            AddComponent<ScreenEffectsController>(visualManagerGO);
-            AddComponent<DamageNumberSpawner>(visualManagerGO);
-
-            var audioManagerGO = CreateOrFind("AudioManager");
-            AddComponent<AudioManager>(audioManagerGO);
 
             Debug.Log("Manager hierarchy created.");
         }
