@@ -391,3 +391,4 @@ Assets/Scenes/Battle.unity (modified - UI wired, materials assigned)
 ---
 
 **AI Agent Task Complete** ✅
+

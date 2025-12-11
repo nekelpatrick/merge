@@ -1,19 +1,20 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEditor;
 
-namespace ShieldWall.EditorHelpers
+namespace ShieldWall.Editor
 {
     /// <summary>
-    /// Helper utilities for creating and configuring UI components at runtime.
-    /// Can be used by editor scripts or for procedural UI generation.
+    /// Helper utilities for creating and configuring UI components programmatically in Editor scripts.
+    /// Used by Phase5_5_PrefabCreator.cs and Phase5_5_SceneIntegrator.cs.
     /// </summary>
     public static class UIComponentFactory
     {
         public static GameObject CreateActionPreviewItemTemplate(Transform parent)
         {
             GameObject root = new GameObject("ActionPreviewItem");
-            root.transform.SetParent(parent, false);
+            if (parent != null) root.transform.SetParent(parent, false);
             
             RectTransform rootRect = root.AddComponent<RectTransform>();
             rootRect.sizeDelta = new Vector2(350, 90);
@@ -85,7 +86,7 @@ namespace ShieldWall.EditorHelpers
         public static GameObject CreateRuneBadgeTemplate(Transform parent)
         {
             GameObject root = new GameObject("RuneBadge");
-            root.transform.SetParent(parent, false);
+            if (parent != null) root.transform.SetParent(parent, false);
             
             RectTransform rootRect = root.AddComponent<RectTransform>();
             rootRect.sizeDelta = new Vector2(60, 30);
@@ -113,7 +114,7 @@ namespace ShieldWall.EditorHelpers
         public static GameObject CreatePhaseBannerTemplate(Transform parent)
         {
             GameObject root = new GameObject("PhaseBannerUI");
-            root.transform.SetParent(parent, false);
+            if (parent != null) root.transform.SetParent(parent, false);
             
             RectTransform rootRect = root.AddComponent<RectTransform>();
             rootRect.anchorMin = new Vector2(0.5f, 1);
@@ -196,3 +197,4 @@ namespace ShieldWall.EditorHelpers
         }
     }
 }
+

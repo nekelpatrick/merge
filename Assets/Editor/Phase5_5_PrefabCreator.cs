@@ -3,7 +3,6 @@ using UnityEditor;
 using UnityEngine.UI;
 using TMPro;
 using ShieldWall.UI;
-using ShieldWall.EditorHelpers;
 
 namespace ShieldWall.Editor
 {
@@ -228,3 +227,4 @@ namespace ShieldWall.Editor
         }
     }
 }
+

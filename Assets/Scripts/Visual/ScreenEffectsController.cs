@@ -65,6 +65,7 @@ namespace ShieldWall.Visual
             GameEvents.OnBrotherWounded += HandleBrotherWounded;
             GameEvents.OnEnemyKilled += HandleEnemyKilled;
             GameEvents.OnAttackBlocked += HandleAttackBlocked;
+            GameEvents.OnAttackLanded += HandleAttackLanded;
             GameEvents.OnStaminaChanged += HandleStaminaChanged;
         }
 
@@ -74,6 +75,7 @@ namespace ShieldWall.Visual
             GameEvents.OnBrotherWounded -= HandleBrotherWounded;
             GameEvents.OnEnemyKilled -= HandleEnemyKilled;
             GameEvents.OnAttackBlocked -= HandleAttackBlocked;
+            GameEvents.OnAttackLanded -= HandleAttackLanded;
             GameEvents.OnStaminaChanged -= HandleStaminaChanged;
         }
 
@@ -96,6 +98,11 @@ namespace ShieldWall.Visual
         private void HandleAttackBlocked(Attack attack)
         {
             StartCoroutine(ShakeCamera(_shakeIntensity * 0.3f));
+        }
+
+        private void HandleAttackLanded(Attack attack)
+        {
+            StartCoroutine(ShakeCamera(_shakeIntensity * 0.5f * attack.Damage));
         }
 
         private void HandleStaminaChanged(int newStamina)
