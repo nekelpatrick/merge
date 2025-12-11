@@ -1,0 +1,498 @@
+---
+description: Shield Wall game development guidelines for Unity and C#
+globs: ["Assets/**/*.cs", "Assets/**/*.unity", "Assets/**/*.prefab", "Assets/**/*.asset"]
+alwaysApply: true
+---
+
+# Shield Wall - Unity Development Guidelines
+
+You are developing **Shield Wall**, a first-person turn-based Viking tactical survival game built in Unity. The player is locked in a shield wall formation, rolling rune dice to determine actions while protecting shield brothers and surviving enemy waves.
+
+## Game Context
+
+**Core Systems:**
+- **Rune Dice System:** 6 rune types, combo-based actions, dice pool management
+- **Shield Wall System:** 5 positions, brother health/morale, wall integrity mechanics
+- **Combat System:** Wave-based enemies, attack targeting, action resolution
+- **Turn Manager:** State machine controlling battle flow phases
+
+**Design Pillars:**
+1. Brotherhood - Shield brothers are mechanical defense, not just flavor
+2. Fate - Dice represent chaos, embrace uncertainty in code
+3. Endurance - Stamina is a doom clock, not a resource
+4. Sacrifice - Trade-offs are core to every decision
+
+---
+
+## Project Structure
+
+```
+Assets/
+├── Scripts/
+│   ├── Core/           → GameManager, TurnManager, BattleState
+│   ├── Dice/           → RuneDie, RuneDicePool, DiceRoller, DiceComboResolver
+│   ├── ShieldWall/     → ShieldWallManager, ShieldBrother, PlayerWarrior
+│   ├── Combat/         → EnemyWaveController, Enemy, Attack, ActionResolver
+│   ├── UI/             → DiceRollUI, ActionSelectionUI, ShieldWallStatusUI
+│   └── Data/           → ScriptableObject definitions (RuneSO, EnemySO, etc.)
+├── ScriptableObjects/  → Data instances (Runes/, Brothers/, Enemies/, Waves/)
+├── Prefabs/            → Dice/, Characters/, UI/
+├── Art/                → Textures/, Shaders/, Materials/
+├── Audio/              → Music/, SFX/, Mixers/
+└── Scenes/             → MainMenu, Battle, Camp
+```
+
+---
+
+## Key Principles
+
+- Write clear, technical C# with precise Unity patterns
+- Use Unity's built-in features; avoid unnecessary dependencies
+- Prioritize readability: PascalCase for public, camelCase for private
+- Keep systems decoupled via events and ScriptableObjects
+- Every system should be testable in isolation
+
+---
+
+## Architecture Patterns
+
+### State Machine for Turn Flow
+
+The TurnManager uses an explicit state machine:
+
+```csharp
+public enum TurnPhase
+{
+    Idle,
+    EnemyReveal,
+    DiceRoll,
+    DiceAssign,
+    ActionSelect,
+    ActionResolve,
+    BrothersAct,
+    DamageResolve,
+    StaminaTick,
+    WaveCheck
+}
+```
+
+Transitions are explicit, not implicit. Each phase completes before the next begins.
+
+### Event-Driven Communication
+
+Systems communicate via C# events or UnityEvents, never direct references:
+
+```csharp
+public static event Action<RuneDie[]> OnDiceRolled;
+public static event Action<ShieldBrother> OnBrotherWounded;
+public static event Action<ShieldBrother> OnBrotherDied;
+public static event Action<Enemy> OnEnemyKilled;
+public static event Action OnWaveCleared;
+public static event Action<bool> OnBattleEnded; // true = victory
+```
+
+UI subscribes to events. Game logic fires events. No UI references in core systems.
+
+### ScriptableObjects for Data
+
+All static game data lives in ScriptableObjects:
+
+```csharp
+[CreateAssetMenu(fileName = "Rune_", menuName = "ShieldWall/Rune")]
+public class RuneSO : ScriptableObject
+{
+    public RuneType runeType;
+    public string runeName;
+    public Sprite icon;
+    public Color color;
+    [TextArea] public string description;
+}
+
+[CreateAssetMenu(fileName = "Brother_", menuName = "ShieldWall/ShieldBrother")]
+public class ShieldBrotherSO : ScriptableObject
+{
+    public string brotherName;
+    public int maxHealth;
+    public float autoDefendChance;
+    public string specialty;
+    public Sprite portrait;
+}
+
+[CreateAssetMenu(fileName = "Enemy_", menuName = "ShieldWall/Enemy")]
+public class EnemySO : ScriptableObject
+{
+    public string enemyName;
+    public int health;
+    public int damage;
+    public EnemyTargetingType targeting;
+    public Sprite icon;
+}
+
+[CreateAssetMenu(fileName = "Wave_", menuName = "ShieldWall/WaveConfig")]
+public class WaveConfigSO : ScriptableObject
+{
+    public int waveNumber;
+    public List<EnemySpawn> enemies;
+    public bool hasScriptedEvent;
+    public string scriptedEventId;
+}
+```
+
+Runtime state is separate from data templates. Clone or instantiate runtime versions.
+
+### Component Separation
+
+Each MonoBehaviour has ONE responsibility:
+
+- `DiceRoller` - Rolls dice, fires OnDiceRolled
+- `DiceComboResolver` - Detects combos from dice, returns available actions
+- `ShieldWallManager` - Tracks positions and wall integrity
+- `ShieldBrother` - Individual brother state and auto-defense
+- `ActionResolver` - Executes chosen actions, applies effects
+
+Do NOT put combo detection in DiceRoller. Do NOT put UI in ActionResolver.
+
+---
+
+## Rune Dice Implementation
+
+### Rune Types Enum
+
+```csharp
+public enum RuneType
+{
+    Thurs,    // Shield - Defense
+    Tyr,      // Axe - Attack
+    Gebo,     // Spear - Precision
+    Berkana,  // Brace - Support
+    Othala,   // Odin - Wild card
+    Laguz     // Loki - Chaos
+}
+```
+
+### Dice Rolling
+
+```csharp
+public class RuneDie
+{
+    public RuneType CurrentFace { get; private set; }
+    public bool IsLocked { get; set; }
+    
+    private float[] weights = new float[6] { 1f, 1f, 1f, 1f, 0.5f, 0.5f };
+    
+    public RuneType Roll()
+    {
+        if (IsLocked) return CurrentFace;
+        CurrentFace = GetWeightedRandom();
+        return CurrentFace;
+    }
+}
+```
+
+Odin (Othala) and Loki (Laguz) are rarer by default. Weights are upgradeable.
+
+### Combo Resolution
+
+Combos are data-driven via ScriptableObjects:
+
+```csharp
+[CreateAssetMenu(fileName = "Action_", menuName = "ShieldWall/Action")]
+public class ActionSO : ScriptableObject
+{
+    public string actionName;
+    public RuneType[] requiredRunes;
+    public ActionEffectType effectType;
+    public int effectPower;
+    public Sprite icon;
+    [TextArea] public string description;
+}
+```
+
+The resolver checks held dice against all ActionSO assets to find matches.
+
+---
+
+## Shield Wall Implementation
+
+### Wall Positions
+
+```csharp
+public enum WallPosition
+{
+    FarLeft,
+    Left,
+    Center,  // Player position
+    Right,
+    FarRight
+}
+```
+
+Player is ALWAYS at Center. Brothers occupy other positions. Gaps are null.
+
+### Wall Integrity
+
+```csharp
+public int GetBonusDice()
+{
+    int alive = GetAliveBrotherCount();
+    return alive switch
+    {
+        4 => 1,      // Full wall: +1 die
+        3 or 2 => 0, // Holding
+        1 => -1,     // Crumbling: -1 die
+        0 => -2,     // Alone: -2 dice
+        _ => 0
+    };
+}
+
+public float GetPlayerTargetChance()
+{
+    int alive = GetAliveBrotherCount();
+    return alive switch
+    {
+        4 or 3 => 0.2f,  // Random targeting
+        2 => 0.6f,       // Mostly player
+        1 => 0.8f,       // Almost always player
+        0 => 1.0f,       // Always player
+        _ => 0.2f
+    };
+}
+```
+
+### Brother Auto-Defense
+
+```csharp
+public bool AttemptAutoDefense()
+{
+    float chance = baseAutoDefendChance * moraleMod * wallIntegrityMod;
+    return Random.value < chance;
+}
+```
+
+Player can override auto-defense by spending dice on Cover actions.
+
+---
+
+## Combat Resolution Order
+
+```csharp
+public void ResolvePhase()
+{
+    // 1. Player STRIKE actions kill enemies first
+    foreach (var strike in playerActions.Where(a => a.IsOffensive))
+        strike.Execute();
+    
+    // 2. Player BLOCK actions negate attacks
+    foreach (var block in playerActions.Where(a => a.IsDefensive))
+        block.Execute();
+    
+    // 3. Brothers attempt auto-defense
+    foreach (var brother in shieldWall.GetAliveBrothers())
+        brother.AttemptAutoDefense();
+    
+    // 4. Remaining attacks deal damage
+    foreach (var attack in unresolvedAttacks)
+        attack.ApplyDamage();
+    
+    // 5. Check for deaths
+    shieldWall.CheckForDeaths();
+}
+```
+
+Order matters. Strikes remove threats. Blocks negate remaining. Then damage.
+
+---
+
+## UI Guidelines
+
+### UI Never Knows Game Logic
+
+```csharp
+// WRONG - UI calling game logic
+public class DiceUI : MonoBehaviour
+{
+    void OnDieClicked(int index)
+    {
+        diceRoller.ToggleLock(index);
+        UpdateVisuals();
+        comboResolver.RecalculateCombos();
+    }
+}
+
+// RIGHT - UI fires event, listens for results
+public class DiceUI : MonoBehaviour
+{
+    public static event Action<int> OnDieClicked;
+    
+    void HandleClick(int index) => OnDieClicked?.Invoke(index);
+    
+    void OnEnable() => DiceRoller.OnDiceStateChanged += UpdateVisuals;
+    void OnDisable() => DiceRoller.OnDiceStateChanged -= UpdateVisuals;
+}
+```
+
+### First-Person View Composition
+
+- Camera is static, locked at shield wall position
+- Brothers are positioned left/right in peripheral vision
+- Enemies spawn ahead, partially obscured by raised shields
+- Dice UI appears in "mind space" overlay (canvas)
+- Shield/arms are visible at screen bottom (separate layer)
+
+---
+
+## Performance Guidelines
+
+### Object Pooling
+
+Pool these frequently instantiated objects:
+- Enemy visual prefabs
+- Damage number popups
+- Blood splatter effects
+- Dice physics objects (if 3D)
+
+```csharp
+public class EnemyPool : MonoBehaviour
+{
+    [SerializeField] private Enemy prefab;
+    private Queue<Enemy> pool = new();
+    
+    public Enemy Get()
+    {
+        var enemy = pool.Count > 0 ? pool.Dequeue() : Instantiate(prefab);
+        enemy.gameObject.SetActive(true);
+        return enemy;
+    }
+    
+    public void Return(Enemy enemy)
+    {
+        enemy.gameObject.SetActive(false);
+        pool.Enqueue(enemy);
+    }
+}
+```
+
+### Avoid Allocations in Turn Loop
+
+Turn-based doesn't mean allocation-free isn't important:
+- Cache GetComponent results
+- Reuse lists for combo detection
+- Use structs for Attack data
+- Avoid LINQ in hot paths (use loops)
+
+---
+
+## Debugging
+
+### Custom Debug Visualization
+
+```csharp
+#if UNITY_EDITOR
+[ContextMenu("Debug: Show Wall State")]
+void DebugWallState()
+{
+    Debug.Log($"Wall Integrity: {GetAliveBrotherCount()}/4");
+    foreach (var pos in System.Enum.GetValues(typeof(WallPosition)))
+        Debug.Log($"  {pos}: {GetBrotherAt((WallPosition)pos)?.brotherName ?? "EMPTY"}");
+}
+#endif
+```
+
+### Assert Critical State
+
+```csharp
+void StartBattle()
+{
+    Debug.Assert(shieldWall != null, "ShieldWall not assigned!");
+    Debug.Assert(dicePool.Count >= 2, "Need at least 2 dice to play!");
+    Debug.Assert(waveConfig.enemies.Count > 0, "Wave has no enemies!");
+}
+```
+
+---
+
+## Testing
+
+### Isolated System Tests
+
+Each system should be testable without Unity:
+- DiceComboResolver: Pure C#, test combo detection
+- ActionResolver: Mock inputs, verify outputs
+- Wall integrity math: Pure functions
+
+### PlayMode Tests for Integration
+
+```csharp
+[UnityTest]
+public IEnumerator TurnFlow_CompletesAllPhases()
+{
+    turnManager.StartBattle();
+    yield return new WaitUntil(() => turnManager.CurrentPhase == TurnPhase.DiceRoll);
+    
+    // Simulate player actions...
+    
+    Assert.AreEqual(TurnPhase.WaveCheck, turnManager.CurrentPhase);
+}
+```
+
+---
+
+## Naming Conventions
+
+| Type | Convention | Example |
+|------|------------|---------|
+| ScriptableObject | `TypeSO` | `RuneSO`, `EnemySO` |
+| Manager/Controller | `TypeManager` | `ShieldWallManager` |
+| UI Component | `TypeUI` | `DiceRollUI` |
+| Event | `OnAction` | `OnDiceRolled`, `OnBrotherDied` |
+| Enum | PascalCase | `RuneType`, `TurnPhase` |
+| Private field | camelCase with underscore | `_currentPhase` |
+| Public property | PascalCase | `CurrentPhase` |
+
+---
+
+## Common Mistakes to Avoid
+
+1. **Don't put turn logic in Update()** - Use state machine with explicit transitions
+2. **Don't reference UI from game systems** - Use events
+3. **Don't hardcode dice/enemy/brother data** - Use ScriptableObjects
+4. **Don't instantiate during combat** - Use object pools
+5. **Don't use strings for state** - Use enums
+6. **Don't make everything a singleton** - Prefer dependency injection or SO references
+7. **Don't skip the resolution order** - Strikes → Blocks → Auto-defense → Damage
+
+---
+
+## Quick Reference: Core Events
+
+```csharp
+// Dice System
+public static event Action<RuneDie[]> OnDiceRolled;
+public static event Action<int, bool> OnDieLockToggled;
+public static event Action<List<ActionSO>> OnAvailableActionsChanged;
+
+// Combat
+public static event Action<List<Enemy>> OnEnemyWaveSpawned;
+public static event Action<Enemy> OnEnemyKilled;
+public static event Action<Attack> OnAttackBlocked;
+public static event Action<Attack> OnAttackLanded;
+
+// Shield Wall
+public static event Action<ShieldBrother, int> OnBrotherWounded;
+public static event Action<ShieldBrother> OnBrotherDied;
+public static event Action<int> OnWallIntegrityChanged;
+
+// Player
+public static event Action<int> OnStaminaChanged;
+public static event Action<int> OnPlayerWounded;
+
+// Turn Flow
+public static event Action<TurnPhase> OnPhaseChanged;
+public static event Action<int> OnWaveStarted;
+public static event Action OnWaveCleared;
+public static event Action<bool> OnBattleEnded;
+```
+
+---
+
+Refer to `Assets/Documentation/GameDesignDocument.md` for full game design details.

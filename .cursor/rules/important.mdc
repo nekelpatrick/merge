@@ -1,0 +1,231 @@
+---
+alwaysApply: true
+---
+
+Architecture & planning
+1. Don’t start without scope and milestones
+
+Why not: scope creep destroys solo projects.
+Do instead: define an MVP (minimum viable gameplay loop) and ship that first. Split into vertical slices (prototype → playable → polished).
+
+2. Don’t skip design docs / rough diagrams
+
+Why not: you’ll lose direction and rewrite systems constantly.
+Do instead: keep a short living design doc (1–2 pages) and an entity / system map. Update it as you iterate.
+
+3. Don’t overengineer patterns up-front
+
+Why not: over-architecting wastes time and burns motivation.
+Do instead: start simple, refactor to patterns (event buses, ECS, DI) when a real need appears and tests/perf justify it.
+
+Code organization & quality
+4. Don’t put everything in Update() on many MonoBehaviours
+
+Why not: Update() on many objects becomes hard to control and expensive.
+Do instead: centralize tick logic where it makes sense (manager or scheduler), use events, or use Unity.Jobs / Coroutine or FixedUpdate() for physics.
+
+5. Don’t allocate memory every frame (garbage creation in hot paths)
+
+Why not: frequent allocations cause GC spikes and hitching.
+Do instead: reuse lists/arrays, use StringBuilder, cache references, use object pooling for items/particles.
+
+6. Don’t call Find, GetComponent, FindObjectOfType repeatedly
+
+Why not: these are slow and brittle.
+Do instead: cache references in Awake()/Start() or use dependency injection / reference wiring via the inspector.
+
+7. Don’t mix game logic, rendering, and data storage in the same class
+
+Why not: coupling makes testing and changing behavior painful.
+Do instead: separate concerns — input, game logic, view, data. Use small, focused classes.
+
+8. Don’t use global mutable singletons for everything
+
+Why not: singletons create hidden coupling and hard-to-track state.
+Do instead: use singletons sparingly (or service locators with interfaces), prefer dependency injection or ScriptableObjects for shared config.
+
+9. Don’t use magic strings and magic numbers
+
+Why not: typos cause runtime bugs that are hard to trace.
+Do instead: use enums, constants, or strongly typed IDs.
+
+10. Don’t leave dead code, commented blocks, or copy-paste cruft
+
+Why not: increases maintenance burden and confusion.
+Do instead: delete unused code; rely on version control to retrieve it.
+
+Unity-specific gotchas
+11. Don’t ignore the Unity lifecycle (Awake/OnEnable/Start/Update/FixedUpdate/LateUpdate)
+
+Why not: wrong lifecycle method causes race conditions and incorrect initialization order.
+Do instead: consistently pick where initialization happens (Awake for references, Start for runtime deps). Understand when FixedUpdate vs Update is appropriate.
+
+12. Don’t perform blocking IO on the main thread
+
+Why not: File.ReadAllText, network calls, heavy serialization will freeze the game.
+Do instead: use async IO, background threads, or UnityWebRequest with callbacks — but marshal results back to the main thread safely.
+
+13. Don’t manipulate Unity objects from background threads
+
+Why not: Unity API is not thread-safe.
+Do instead: only use threads for pure CPU work; schedule changes back to main thread (e.g., MainThreadDispatcher).
+
+14. Don’t abuse Coroutines as a global state manager
+
+Why not: coroutines are great, but many anonymous coroutines are hard to cancel and debug.
+Do instead: keep references to started coroutines, use dedicated coroutine managers or token cancellation patterns.
+
+15. Don’t assume inspector assignments are always present in builds
+
+Why not: missing serialized fields = null refs at runtime.
+Do instead: validate in OnValidate() / Awake() and log early errors. Provide failsafes.
+
+Performance & memory
+16. Don’t instantiate/destroy frequently (especially UI, bullets, enemies)
+
+Why not: expensive and creates GC overhead.
+Do instead: use pooling (object pools), reuse UI elements, avoid recreating heavy objects.
+
+17. Don’t leave high-poly meshes or huge textures unoptimized
+
+Why not: memory & GPU overload kills performance and build size.
+Do instead: compress textures, LODs, atlas sprites, trim unused assets.
+
+18. Don’t ignore profiling — assume it’s fine
+
+Why not: assumptions about performance are often wrong.
+Do instead: use Unity Profiler, Deep Profiling sparingly, and test on target devices early.
+
+19. Don’t run expensive physics checks every frame if unnecessary
+
+Why not: physics queries (OverlapSphere, RaycastAll) are costly.
+Do instead: optimize colliders, use layers, reduce query frequency, or use event-driven triggers.
+
+Asset & project hygiene
+20. Don’t store large binary assets (builds, generated files) in the repo
+
+Why not: bloats repo and slows cloning.
+Do instead: use Git LFS for large assets or a dedicated asset server; keep the repo mostly code + metadata.
+
+21. Don’t ignore build targets / platform differences
+
+Why not: something working on editor/Mac may fail on mobile/consoles.
+Do instead: test on the lowest-spec target early and use platform-specific code guarded with #if UNITY_ANDROID etc.
+
+22. Don’t leave debug/development tools enabled in release
+
+Why not: leaks internal state, affects perf, and can expose cheats.
+Do instead: gate debug UI/logging behind dev flags or compile-time symbols.
+
+23. Don’t bloat scenes with thousands of enabled GameObjects unnecessarily
+
+Why not: more active objects = overhead (update calls, rendering).
+Do instead: combine meshes, use static/dynamic batching, enable/disable objects as needed, use virtualization for UI lists.
+
+Data, serialization & state
+24. Don’t misuse ScriptableObjects as global mutable state
+
+Why not: editing runtime state in ScriptableObjects can persist unwanted changes or cause hard-to-track bugs.
+Do instead: use ScriptableObjects for immutable config/data; if you need runtime state, clone or hold per-session instances.
+
+25. Don’t rely solely on PlayerPrefs for important data
+
+Why not: PlayerPrefs is for small settings only and not secure.
+Do instead: use a proper save system (JSON/Binary files, encryption if needed) and version your save formats.
+
+26. Don’t change serialized field names without migration
+
+Why not: renaming fields will break existing serialized data and cause data loss.
+Do instead: use [FormerlySerializedAs("oldName")] or write migration code.
+
+Tools, testing & process
+27. Don’t skip version control or comitting frequently
+
+Why not: you’ll lose progress and cannot revert regressions easily.
+Do instead: commit small atomic changes, use branches for experiments, tag milestones.
+
+28. Don’t ignore automated builds (CI) and test on a CI build
+
+Why not: editor-only behaviors or missing files may only appear in a clean build.
+Do instead: set up a simple CI pipeline to build and run smoke tests (even a local script that builds the player).
+
+29. Don’t ship without testing on real hardware
+
+Why not: editor performance differs from device performance.
+Do instead: regularly deploy test builds to devices and keep a short test checklist per build.
+
+30. Don’t avoid writing tests for critical logic
+
+Why not: regressions accumulate, and solo debugging time is precious.
+Do instead: unit test game logic (pure C#), integration test save/load and network code where feasible.
+
+UI & UX
+31. Don’t hardcode UI layouts for one resolution or aspect ratio
+
+Why not: UI breaks on different screens.
+Do instead: use anchors, canvas scalers and test multiple aspect ratios.
+
+32. Don’t show unskippable long load screens or blocking modal dialogs
+
+Why not: frustrates users and testers.
+Do instead: show progress, allow cancellation, or load asynchronously.
+
+Multiplayer & networking (if relevant)
+33. Don’t implement networking without a plan for authority & security
+
+Why not: vulnerable to cheating, desyncs, and wasted time.
+Do instead: choose a simple authoritative model, validate on server, and use deterministic inputs or reconciliation where needed.
+
+34. Don’t test networking only on localhost
+
+Why not: latency/packet loss issues surface only on real networks.
+Do instead: test with simulated latency and real remote hosts.
+
+Common rookie mistakes that cause endless pain
+35. Don’t copy Unity forum snippets blindly
+
+Why not: context matters and snippets may be outdated or buggy.
+Do instead: understand code before integrating and test behavior.
+
+36. Don’t ignore edge cases (nulls, destroyed objects, scene load ordering)
+
+Why not: race conditions and NREs are frequent.
+Do instead: null-check, use TryGetComponent, guard coroutines, and handle scene transitions explicitly.
+
+37. Don’t put too much logic into the Editor-only classes without runtime fallbacks
+
+Why not: some systems may rely on Editor-only code and fail in builds.
+Do instead: ensure runtime alternatives exist or guard with #if UNITY_EDITOR.
+
+38. Don’t procrastinate learning the Profiler and Frame Debugger
+
+Why not: you’ll waste time guessing bottlenecks.
+Do instead: spend a few hours learning them — huge ROI.
+
+Practical “fix now” checklist (quick actions)
+
+Add Git + .gitignore for Unity and commit current work.
+
+Define an MVP and write a 1-page design doc.
+
+Run the Profiler, capture a sample scene, and inspect GC & main thread spikes.
+
+Replace repeated GetComponent in hot code with cached references.
+
+Add simple object pooling for bullets/enemies/particles.
+
+Validate all inspector fields in Awake() with helpful error logs.
+
+Export a small build and test it on your target device.
+
+Final advice — how to think when solo:
+
+Ship vertical slices. A finished small loop beats an unfinished big game.
+
+Measure, don’t guess. Profile early and often.
+
+Automate boring repeatable tasks. Builds, tests, and deploys.
+
+Keep things simple and replaceable. Prefer composition over inheritance for game objects.
+
+Protect your time. Don’t polish features that don’t affect the core gameplay loop.
