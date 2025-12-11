@@ -76,5 +76,7 @@ namespace ShieldWall.Core
         public EnemySO Source;
         public int Damage;
         public WallPosition Target;
+        public bool IgnoresBlocks;
+        public bool DestroysBlock;
     }
 }

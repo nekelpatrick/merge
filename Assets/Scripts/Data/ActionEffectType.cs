@@ -6,7 +6,12 @@ namespace ShieldWall.Data
         Strike,
         Cover,
         Brace,
-        Counter
+        Counter,
+        BlockAll,
+        BerserkerRage,
+        Heal,
+        Stun,
+        MultiStrike
     }
 }
 

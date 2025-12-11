@@ -223,9 +223,12 @@ namespace ShieldWall.Editor
         [MenuItem("Shield Wall/Setup/Create Enemy Assets")]
         public static void CreateEnemyAssets()
         {
-            CreateEnemy("Thrall", 1, 1, EnemyTargetingType.Random);
-            CreateEnemy("Warrior", 1, 1, EnemyTargetingType.LowestHealth);
-            CreateEnemy("Spearman", 1, 2, EnemyTargetingType.Player);
+            CreateEnemy("Thrall", 1, 1, EnemyTargetingType.Random, false, false, new Color(0.5f, 0.5f, 0.5f));
+            CreateEnemy("Warrior", 1, 1, EnemyTargetingType.LowestHealth, false, false, new Color(0.6f, 0.3f, 0.2f));
+            CreateEnemy("Spearman", 1, 2, EnemyTargetingType.Player, false, false, new Color(0.4f, 0.35f, 0.2f));
+            CreateEnemy("Berserker", 2, 2, EnemyTargetingType.Player, false, false, new Color(0.7f, 0.15f, 0.15f));
+            CreateEnemy("Archer", 1, 1, EnemyTargetingType.Random, true, false, new Color(0.3f, 0.5f, 0.3f));
+            CreateEnemy("ShieldBreaker", 1, 1, EnemyTargetingType.Player, false, true, new Color(0.3f, 0.3f, 0.5f));
             
             Debug.Log("Shield Wall: Enemy assets created");
         }
@@ -238,6 +241,11 @@ namespace ShieldWall.Editor
             CreateAction("Cover", new[] { RuneType.Thurs, RuneType.Berkana }, ActionEffectType.Cover, 1, "Block attack on adjacent brother");
             CreateAction("Brace", new[] { RuneType.Berkana, RuneType.Berkana }, ActionEffectType.Brace, 1, "Reduce next wound to scratch");
             CreateAction("Counter", new[] { RuneType.Tyr, RuneType.Thurs }, ActionEffectType.Counter, 1, "Block + kill attacker");
+            CreateAction("Testudo", new[] { RuneType.Thurs, RuneType.Thurs, RuneType.Thurs }, ActionEffectType.BlockAll, 1, "Block ALL attacks this turn");
+            CreateAction("Berserker", new[] { RuneType.Tyr, RuneType.Tyr, RuneType.Tyr }, ActionEffectType.BerserkerRage, 3, "Kill 3 enemies, take 1 wound");
+            CreateAction("Rally", new[] { RuneType.Berkana, RuneType.Berkana, RuneType.Berkana }, ActionEffectType.Heal, 1, "Heal 1 wound from each brother");
+            CreateAction("WallPush", new[] { RuneType.Thurs, RuneType.Berkana, RuneType.Gebo }, ActionEffectType.Stun, 1, "Stun all enemies for 1 turn");
+            CreateAction("SpearWall", new[] { RuneType.Gebo, RuneType.Gebo, RuneType.Gebo }, ActionEffectType.MultiStrike, 2, "Kill 2 enemies");
             
             Debug.Log("Shield Wall: Action assets created");
         }
@@ -248,6 +256,9 @@ namespace ShieldWall.Editor
             var thrall = AssetDatabase.LoadAssetAtPath<EnemySO>("Assets/ScriptableObjects/Enemies/Enemy_Thrall.asset");
             var warrior = AssetDatabase.LoadAssetAtPath<EnemySO>("Assets/ScriptableObjects/Enemies/Enemy_Warrior.asset");
             var spearman = AssetDatabase.LoadAssetAtPath<EnemySO>("Assets/ScriptableObjects/Enemies/Enemy_Spearman.asset");
+            var berserker = AssetDatabase.LoadAssetAtPath<EnemySO>("Assets/ScriptableObjects/Enemies/Enemy_Berserker.asset");
+            var archer = AssetDatabase.LoadAssetAtPath<EnemySO>("Assets/ScriptableObjects/Enemies/Enemy_Archer.asset");
+            var shieldBreaker = AssetDatabase.LoadAssetAtPath<EnemySO>("Assets/ScriptableObjects/Enemies/Enemy_ShieldBreaker.asset");
 
             if (thrall == null || warrior == null || spearman == null)
             {
@@ -258,6 +269,12 @@ namespace ShieldWall.Editor
             CreateWave(1, new[] { (thrall, 3) });
             CreateWave(2, new[] { (thrall, 2), (warrior, 2) });
             CreateWave(3, new[] { (warrior, 2), (spearman, 2), (thrall, 1) });
+            
+            if (berserker != null && archer != null && shieldBreaker != null)
+            {
+                CreateWave(4, new[] { (warrior, 3), (archer, 2), (shieldBreaker, 1) });
+                CreateWave(5, new[] { (berserker, 2), (spearman, 2), (shieldBreaker, 1) });
+            }
             
             Debug.Log("Shield Wall: Wave assets created");
         }
@@ -300,7 +317,8 @@ namespace ShieldWall.Editor
             AssetDatabase.CreateAsset(brother, path);
         }
 
-        private static void CreateEnemy(string name, int health, int damage, EnemyTargetingType targeting)
+        private static void CreateEnemy(string name, int health, int damage, EnemyTargetingType targeting, 
+            bool ignoresBlocks = false, bool destroysBlock = false, Color? tintColor = null)
         {
             string path = $"Assets/ScriptableObjects/Enemies/Enemy_{name}.asset";
             
@@ -315,6 +333,9 @@ namespace ShieldWall.Editor
             enemy.health = health;
             enemy.damage = damage;
             enemy.targeting = targeting;
+            enemy.ignoresBlocks = ignoresBlocks;
+            enemy.destroysBlock = destroysBlock;
+            enemy.tintColor = tintColor ?? Color.white;
 
             AssetDatabase.CreateAsset(enemy, path);
         }

@@ -127,16 +127,7 @@ namespace ShieldWall.UI
 
         private Color GetDefaultColor(RuneType type)
         {
-            return type switch
-            {
-                RuneType.Thurs => new Color(0.36f, 0.36f, 0.36f),
-                RuneType.Tyr => new Color(0.55f, 0.13f, 0.13f),
-                RuneType.Gebo => new Color(0.55f, 0.41f, 0.08f),
-                RuneType.Berkana => new Color(0.24f, 0.36f, 0.24f),
-                RuneType.Othala => new Color(0.79f, 0.64f, 0.15f),
-                RuneType.Laguz => new Color(0.36f, 0.24f, 0.43f),
-                _ => Color.white
-            };
+            return UIColorPalette.GetRuneColor(type);
         }
     }
 }

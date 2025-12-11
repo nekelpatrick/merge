@@ -61,6 +61,8 @@ namespace ShieldWall.Core
             
             WireWaveController(waveController);
             
+            WireCombatResolver(combatResolver, waveController, shieldWallManager, playerWarrior);
+            
             WireShieldWallManager(shieldWallManager);
             
             WireWallStatusUI(wallStatusUI, shieldWallManager);
@@ -186,6 +188,17 @@ namespace ShieldWall.Core
                 SetPrivateField(ewc, "_waveConfigs", waves);
                 Log($"EnemyWaveController wired with {waves.Length} waves");
             }
+        }
+
+        private void WireCombatResolver(CombatResolver cr, EnemyWaveController ewc, 
+            ShieldWallManager swm, PlayerWarrior pw)
+        {
+            if (cr == null) { Log("CombatResolver not found!"); return; }
+
+            SetPrivateField(cr, "_waveController", ewc);
+            SetPrivateField(cr, "_shieldWallManager", swm);
+            SetPrivateField(cr, "_player", pw);
+            Log("CombatResolver wired");
         }
 
         private void WireShieldWallManager(ShieldWallManager swm)

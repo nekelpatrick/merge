@@ -48,6 +48,8 @@ namespace ShieldWall.Editor
             CreateManagerHierarchy();
             CreateUIPrefabs();
             CreateCanvasHierarchy();
+            CreateFirstPersonArms();
+            CreateEnemyVisuals();
             WireManagerReferences();
             AssignScriptableObjects();
 
@@ -55,6 +57,84 @@ namespace ShieldWall.Editor
             EditorSceneManager.SaveScene(scene);
 
             Debug.Log("Battle scene setup complete! Press Play to test.");
+        }
+
+        [MenuItem("Shield Wall/Setup/Create First Person Arms")]
+        public static void CreateFirstPersonArms()
+        {
+            var existing = GameObject.Find("PlayerArms");
+            if (existing != null)
+            {
+                Object.DestroyImmediate(existing);
+            }
+
+            var playerArms = new GameObject("PlayerArms");
+            playerArms.layer = 6;
+
+            var shield = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            shield.name = "Shield";
+            shield.transform.SetParent(playerArms.transform);
+            shield.transform.localPosition = new Vector3(-0.3f, -0.3f, 0.8f);
+            shield.transform.localScale = new Vector3(0.6f, 0.8f, 0.05f);
+            shield.transform.localRotation = Quaternion.Euler(0, 15f, 0);
+            shield.layer = 6;
+
+            var leftArm = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            leftArm.name = "LeftArm";
+            leftArm.transform.SetParent(playerArms.transform);
+            leftArm.transform.localPosition = new Vector3(-0.25f, -0.4f, 0.6f);
+            leftArm.transform.localScale = new Vector3(0.08f, 0.25f, 0.08f);
+            leftArm.transform.localRotation = Quaternion.Euler(45f, 0, 0);
+            leftArm.layer = 6;
+
+            var rightArm = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            rightArm.name = "RightArm";
+            rightArm.transform.SetParent(playerArms.transform);
+            rightArm.transform.localPosition = new Vector3(0.3f, -0.5f, 0.5f);
+            rightArm.transform.localScale = new Vector3(0.08f, 0.25f, 0.08f);
+            rightArm.transform.localRotation = Quaternion.Euler(60f, 0, 0);
+            rightArm.layer = 6;
+
+            var weapon = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            weapon.name = "Axe";
+            weapon.transform.SetParent(rightArm.transform);
+            weapon.transform.localPosition = new Vector3(0, 0.5f, 0);
+            weapon.transform.localScale = new Vector3(0.3f, 0.5f, 0.1f);
+            weapon.layer = 6;
+
+            Debug.Log("First-person arms created. Assign to PlayerView layer (6).");
+        }
+
+        [MenuItem("Shield Wall/Setup/Create Enemy Visuals")]
+        public static void CreateEnemyVisuals()
+        {
+            var existing = GameObject.Find("EnemySpawnPoint");
+            if (existing != null)
+            {
+                Object.DestroyImmediate(existing);
+            }
+
+            var spawnPoint = new GameObject("EnemySpawnPoint");
+            spawnPoint.transform.position = new Vector3(0, 0, 5f);
+            
+            for (int i = 0; i < 5; i++)
+            {
+                var enemy = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                enemy.name = $"EnemyPlaceholder_{i}";
+                enemy.transform.SetParent(spawnPoint.transform);
+                enemy.transform.localPosition = new Vector3((i - 2) * 1.5f, 1f, 0);
+                enemy.transform.localScale = new Vector3(0.5f, 1f, 0.5f);
+                enemy.layer = 8;
+                enemy.SetActive(false);
+
+                var renderer = enemy.GetComponent<Renderer>();
+                if (renderer != null)
+                {
+                    renderer.material.color = new Color(0.5f, 0.2f, 0.2f);
+                }
+            }
+
+            Debug.Log("Enemy visual placeholders created.");
         }
 
         [MenuItem("Shield Wall/Setup/1. Create Manager Hierarchy")]
