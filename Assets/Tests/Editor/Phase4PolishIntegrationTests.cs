@@ -4,6 +4,8 @@ using ShieldWall.Core;
 using ShieldWall.Visual;
 using ShieldWall.Audio;
 using ShieldWall.Combat;
+using ShieldWall.UI;
+using ShieldWall.DebugTools;
 
 namespace ShieldWall.Tests.Editor
 {
@@ -157,13 +159,13 @@ namespace ShieldWall.Tests.Editor
         [Test]
         public void UIAnimator_ProvidesStaticMethods()
         {
-            var method = typeof(ShieldWall.UI.UIAnimator).GetMethod("PunchScale");
+            var method = typeof(UIAnimator).GetMethod("PunchScale");
             Assert.IsNotNull(method, "UIAnimator should have PunchScale method");
 
-            method = typeof(ShieldWall.UI.UIAnimator).GetMethod("Shake");
+            method = typeof(UIAnimator).GetMethod("Shake");
             Assert.IsNotNull(method, "UIAnimator should have Shake method");
 
-            method = typeof(ShieldWall.UI.UIAnimator).GetMethod("FadeIn");
+            method = typeof(UIAnimator).GetMethod("FadeIn");
             Assert.IsNotNull(method, "UIAnimator should have FadeIn method");
         }
 
@@ -172,7 +174,7 @@ namespace ShieldWall.Tests.Editor
         {
             var go = new GameObject("TestButtonFeedback");
             var button = go.AddComponent<UnityEngine.UI.Button>();
-            var feedback = go.AddComponent<ShieldWall.UI.ButtonFeedback>();
+            var feedback = go.AddComponent<ButtonFeedback>();
 
             Assert.IsNotNull(feedback, "ButtonFeedback should be creatable");
 
@@ -184,7 +186,7 @@ namespace ShieldWall.Tests.Editor
         {
             var go = new GameObject("TestHealthHeartAnimator");
             go.AddComponent<RectTransform>();
-            var animator = go.AddComponent<ShieldWall.UI.HealthHeartAnimator>();
+            var animator = go.AddComponent<HealthHeartAnimator>();
 
             Assert.IsNotNull(animator, "HealthHeartAnimator should be creatable");
 
@@ -196,7 +198,7 @@ namespace ShieldWall.Tests.Editor
         {
             var go = new GameObject("TestStaminaDrainEffect");
             go.AddComponent<RectTransform>();
-            var effect = go.AddComponent<ShieldWall.UI.StaminaDrainEffect>();
+            var effect = go.AddComponent<StaminaDrainEffect>();
 
             Assert.IsNotNull(effect, "StaminaDrainEffect should be creatable");
 
@@ -302,7 +304,7 @@ namespace ShieldWall.Tests.Editor
         public void PolishDebugger_CanBeCreated()
         {
             var go = new GameObject("TestPolishDebugger");
-            var debugger = go.AddComponent<ShieldWall.Debug.PolishDebugger>();
+            var debugger = go.AddComponent<PolishDebugger>();
 
             Assert.IsNotNull(debugger, "PolishDebugger should be creatable");
 

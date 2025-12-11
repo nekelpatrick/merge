@@ -23,6 +23,11 @@ namespace ShieldWall.Visual
         [SerializeField] private Color _flashColor = new Color(1f, 1f, 1f, 0.3f);
         [SerializeField] private float _flashDuration = 0.1f;
 
+        [Header("Stamina Pulse")]
+        [SerializeField] private Image _staminaPulseImage;
+        [SerializeField] private Color _staminaColor = new Color(61f/255f, 90f/255f, 110f/255f, 0.3f);
+        [SerializeField] private float _staminaPulseDuration = 0.3f;
+
         private Vector3 _cameraOriginalPos;
         private bool _isShaking;
 
@@ -47,6 +52,11 @@ namespace ShieldWall.Visual
             {
                 _flashImage.color = Color.clear;
             }
+
+            if (_staminaPulseImage != null)
+            {
+                _staminaPulseImage.color = Color.clear;
+            }
         }
 
         private void OnEnable()
@@ -55,6 +65,7 @@ namespace ShieldWall.Visual
             GameEvents.OnBrotherWounded += HandleBrotherWounded;
             GameEvents.OnEnemyKilled += HandleEnemyKilled;
             GameEvents.OnAttackBlocked += HandleAttackBlocked;
+            GameEvents.OnStaminaChanged += HandleStaminaChanged;
         }
 
         private void OnDisable()
@@ -63,6 +74,7 @@ namespace ShieldWall.Visual
             GameEvents.OnBrotherWounded -= HandleBrotherWounded;
             GameEvents.OnEnemyKilled -= HandleEnemyKilled;
             GameEvents.OnAttackBlocked -= HandleAttackBlocked;
+            GameEvents.OnStaminaChanged -= HandleStaminaChanged;
         }
 
         private void HandlePlayerWounded(int damage)
@@ -84,6 +96,11 @@ namespace ShieldWall.Visual
         private void HandleAttackBlocked(Attack attack)
         {
             StartCoroutine(ShakeCamera(_shakeIntensity * 0.3f));
+        }
+
+        private void HandleStaminaChanged(int newStamina)
+        {
+            StartCoroutine(PulseStamina());
         }
 
         [ContextMenu("Test Camera Shake")]
@@ -145,6 +162,24 @@ namespace ShieldWall.Visual
             _flashImage.color = color;
             yield return new WaitForSeconds(_flashDuration);
             _flashImage.color = Color.clear;
+        }
+
+        private IEnumerator PulseStamina()
+        {
+            if (_staminaPulseImage == null) yield break;
+
+            _staminaPulseImage.color = _staminaColor;
+            
+            float elapsed = 0f;
+            while (elapsed < _staminaPulseDuration)
+            {
+                float t = elapsed / _staminaPulseDuration;
+                _staminaPulseImage.color = Color.Lerp(_staminaColor, Color.clear, t);
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            _staminaPulseImage.color = Color.clear;
         }
     }
 }

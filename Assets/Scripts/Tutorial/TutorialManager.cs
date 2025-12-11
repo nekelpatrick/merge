@@ -35,6 +35,9 @@ namespace ShieldWall.Tutorial
             GameEvents.OnPhaseChanged += HandlePhaseChanged;
             GameEvents.OnWaveStarted += HandleWaveStarted;
             GameEvents.OnDieLockToggled += HandleDieLockToggled;
+            GameEvents.OnPlayerWounded += HandlePlayerWounded;
+            GameEvents.OnBrotherWounded += HandleBrotherWounded;
+            GameEvents.OnDiceRolled += HandleDiceRolled;
         }
 
         void OnDisable()
@@ -42,6 +45,9 @@ namespace ShieldWall.Tutorial
             GameEvents.OnPhaseChanged -= HandlePhaseChanged;
             GameEvents.OnWaveStarted -= HandleWaveStarted;
             GameEvents.OnDieLockToggled -= HandleDieLockToggled;
+            GameEvents.OnPlayerWounded -= HandlePlayerWounded;
+            GameEvents.OnBrotherWounded -= HandleBrotherWounded;
+            GameEvents.OnDiceRolled -= HandleDiceRolled;
         }
 
         private void HandlePhaseChanged(TurnPhase phase)
@@ -61,7 +67,22 @@ namespace ShieldWall.Tutorial
             _lockedDiceCount = Mathf.Max(0, _lockedDiceCount);
 
             if (locked && _lockedDiceCount == 1)
-                CheckHints(TurnPhase.PlayerTurn);
+                CheckHintsForEvent("first_dice_locked");
+        }
+
+        private void HandlePlayerWounded(int damage)
+        {
+            CheckHintsForEvent("first_damage_taken");
+        }
+
+        private void HandleBrotherWounded(ShieldBrotherSO brother, int damage)
+        {
+            CheckHintsForEvent("first_brother_wounded");
+        }
+
+        private void HandleDiceRolled(Dice.RuneDie[] dice)
+        {
+            CheckHintsForEvent("first_dice_roll");
         }
 
         private void CheckHints(TurnPhase currentPhase)
@@ -69,6 +90,21 @@ namespace ShieldWall.Tutorial
             foreach (var hint in _hints)
             {
                 if (ShouldShowHint(hint, currentPhase))
+                {
+                    ShowHint(hint);
+                    break;
+                }
+            }
+        }
+
+        private void CheckHintsForEvent(string eventId)
+        {
+            foreach (var hint in _hints)
+            {
+                if (_shownHints.Contains(hint.hintId))
+                    continue;
+
+                if (hint.hintId.Contains(eventId))
                 {
                     ShowHint(hint);
                     break;

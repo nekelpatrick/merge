@@ -110,23 +110,10 @@ namespace ShieldWall.UI
             var sb = new System.Text.StringBuilder();
             foreach (var rune in _action.requiredRunes)
             {
-                sb.Append(GetRuneSymbol(rune));
+                var fullName = RuneDisplay.GetFullName(rune);
+                sb.Append(fullName).Append(" ");
             }
-            return sb.ToString();
-        }
-
-        private string GetRuneSymbol(RuneType type)
-        {
-            return type switch
-            {
-                RuneType.Thurs => "[SH]",
-                RuneType.Tyr => "[AX]",
-                RuneType.Gebo => "[SP]",
-                RuneType.Berkana => "[BR]",
-                RuneType.Othala => "[OD]",
-                RuneType.Laguz => "[LO]",
-                _ => "[?]"
-            };
+            return sb.ToString().Trim();
         }
 
         private void HandleClick()
