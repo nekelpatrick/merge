@@ -61,6 +61,7 @@ namespace ShieldWall.Editor
         public static void CreateManagerHierarchy()
         {
             var gameManagerGO = CreateOrFind("GameManager");
+            AddComponent<BattleBootstrapper>(gameManagerGO);
             _battleManager = AddComponent<BattleManager>(gameManagerGO);
             _turnManager = AddComponent<TurnManager>(gameManagerGO);
             _staminaManager = AddComponent<StaminaManager>(gameManagerGO);
@@ -295,10 +296,25 @@ namespace ShieldWall.Editor
             _waveUI = waveTextGO.AddComponent<WaveUI>();
             SetPrivateField(_waveUI, "_waveText", waveText);
 
+            var enemyPanel = CreateUIPanel("EnemyPanel", topBar.transform);
+            var enemyRect = enemyPanel.GetComponent<RectTransform>();
+            enemyRect.sizeDelta = new Vector2(400, 40);
+            enemyPanel.GetComponent<Image>().color = new Color(0.3f, 0.15f, 0.15f, 0.8f);
+            
+            var enemyLayout = enemyPanel.AddComponent<HorizontalLayoutGroup>();
+            enemyLayout.spacing = 10;
+            enemyLayout.padding = new RectOffset(10, 10, 5, 5);
+            enemyLayout.childAlignment = TextAnchor.MiddleCenter;
+            enemyLayout.childControlWidth = false;
+            enemyLayout.childControlHeight = false;
+            
+            var enemyUI = enemyPanel.AddComponent<EnemyUI>();
+            SetPrivateField(enemyUI, "_enemyContainer", enemyPanel.transform);
+
             var spacer = new GameObject("Spacer");
             spacer.transform.SetParent(topBar.transform, false);
             var spacerRect = spacer.AddComponent<RectTransform>();
-            spacerRect.sizeDelta = new Vector2(800, 40);
+            spacerRect.sizeDelta = new Vector2(400, 40);
             var spacerLayout = spacer.AddComponent<LayoutElement>();
             spacerLayout.flexibleWidth = 1;
 

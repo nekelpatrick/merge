@@ -9,8 +9,40 @@ using ShieldWall.ShieldWall;
 
 namespace ShieldWall.Editor
 {
+    [InitializeOnLoad]
     public static class ShieldWallSetup
     {
+        static ShieldWallSetup()
+        {
+            EditorApplication.delayCall += () =>
+            {
+                CreateMissingRuneAssets();
+            };
+        }
+
+        private static void CreateMissingRuneAssets()
+        {
+            bool created = false;
+            
+            if (AssetDatabase.LoadAssetAtPath<RuneSO>("Assets/ScriptableObjects/Runes/Rune_Othala.asset") == null)
+            {
+                CreateRune(RuneType.Othala, "Odin", new Color(0.79f, 0.64f, 0.15f), "Wild card rune - can substitute any rune");
+                created = true;
+            }
+            
+            if (AssetDatabase.LoadAssetAtPath<RuneSO>("Assets/ScriptableObjects/Runes/Rune_Laguz.asset") == null)
+            {
+                CreateRune(RuneType.Laguz, "Loki", new Color(0.36f, 0.24f, 0.43f), "Chaos rune - unpredictable effects");
+                created = true;
+            }
+            
+            if (created)
+            {
+                AssetDatabase.SaveAssets();
+                Debug.Log("Shield Wall: Created missing rune assets (Othala, Laguz)");
+            }
+        }
+
         [MenuItem("Shield Wall/Setup/Run Complete Setup")]
         public static void RunCompleteSetup()
         {
@@ -171,6 +203,8 @@ namespace ShieldWall.Editor
             CreateRune(RuneType.Tyr, "Axe", new Color(0.55f, 0.13f, 0.13f), "Attack rune - strikes enemies");
             CreateRune(RuneType.Gebo, "Spear", new Color(0.55f, 0.41f, 0.08f), "Precision rune - targeted attacks");
             CreateRune(RuneType.Berkana, "Brace", new Color(0.24f, 0.36f, 0.24f), "Support rune - reinforcement");
+            CreateRune(RuneType.Othala, "Odin", new Color(0.79f, 0.64f, 0.15f), "Wild card rune - can substitute any rune");
+            CreateRune(RuneType.Laguz, "Loki", new Color(0.36f, 0.24f, 0.43f), "Chaos rune - unpredictable effects");
             
             Debug.Log("Shield Wall: Rune assets created");
         }

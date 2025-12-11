@@ -57,6 +57,8 @@ namespace ShieldWall.UI
 
         private void HandleBattleEnded(bool victory)
         {
+            gameObject.SetActive(true);
+            
             if (victory)
             {
                 ShowVictory();
