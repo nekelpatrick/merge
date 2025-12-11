@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using ShieldWall.Core;
 
 namespace ShieldWall.Visual
 {
@@ -125,7 +126,7 @@ namespace ShieldWall.Visual
             while (elapsed < _rippleDuration)
             {
                 float t = elapsed / _rippleDuration;
-                float scale = Tweener.Evaluate(t, Core.EaseType.EaseOutQuad) * _rippleMaxScale;
+                float scale = Tweener.Evaluate(t, EaseType.EaseOutQuad) * _rippleMaxScale;
                 _ripple.localScale = Vector3.one * scale;
 
                 Color c = _rippleColor;

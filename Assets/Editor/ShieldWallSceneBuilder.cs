@@ -8,10 +8,12 @@ using TMPro;
 using ShieldWall.Core;
 using ShieldWall.Combat;
 using ShieldWall.Dice;
-using ShieldWall.ShieldWall;
+using ShieldWall.Audio;
 using ShieldWall.UI;
 using ShieldWall.Data;
 using ShieldWall.Visual;
+using ShieldWall.DebugTools;
+using ShieldWall.ShieldWall;
 using System.Collections.Generic;
 using System.IO;
 
@@ -377,16 +379,16 @@ namespace ShieldWall.Editor
             AddComponent<ScreenEffectsController>(polishGO);
 
             var audioGO = CreateOrFind("AudioControllers");
-            AddComponent<ShieldWall.Audio.CombatSFXController>(audioGO);
-            AddComponent<ShieldWall.Audio.UISFXController>(audioGO);
-            AddComponent<ShieldWall.Audio.AmbientController>(audioGO);
+            AddComponent<CombatSFXController>(audioGO);
+            AddComponent<UISFXController>(audioGO);
+            AddComponent<AmbientController>(audioGO);
 
             var combatGO = CreateOrFind("CombatManager");
-            AddComponent<ShieldWall.Combat.CombatPacer>(combatGO);
-            AddComponent<ShieldWall.Combat.AttackTelegraph>(combatGO);
+            AddComponent<CombatPacer>(combatGO);
+            AddComponent<AttackTelegraph>(combatGO);
 
             var debugGO = CreateOrFind("DebugTools");
-            AddComponent<ShieldWall.Debug.PolishDebugger>(debugGO);
+            AddComponent<PolishDebugger>(debugGO);
 
             Debug.Log("Polish components added: CameraEffects, TimeController, PostProcess, ImpactVFX, HitEmphasis, Audio controllers, Combat timing, Debug tools");
         }

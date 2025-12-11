@@ -166,10 +166,7 @@ namespace ShieldWall.Editor
             EditorGUILayout.EndVertical();
         }
 
-        private T FindFirstObjectByType<T>() where T : Object
-        {
-            return Object.FindFirstObjectByType<T>();
-        }
+        private new T FindFirstObjectByType<T>() where T : Object => Object.FindFirstObjectByType<T>();
     }
 }
 

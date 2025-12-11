@@ -2,7 +2,7 @@ using UnityEngine;
 using ShieldWall.Visual;
 using ShieldWall.Core;
 
-namespace ShieldWall.Debug
+namespace ShieldWall.DebugTools
 {
     public class PolishDebugger : MonoBehaviour
     {

@@ -91,7 +91,7 @@ namespace ShieldWall.Visual
                 blood.transform.position = position;
                 blood.transform.forward = direction;
                 blood.gameObject.SetActive(true);
-                blood.Play(intensity);
+                blood.Play();
                 StartCoroutine(ReturnToPoolAfterDelay(blood, 2f));
             }
         }
