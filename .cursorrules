@@ -143,3 +143,6 @@ void OnClick() => OnButtonClicked?.Invoke();
 6. Make everything a singleton — Prefer dependency injection or SO references
 7. Skip resolution order — Strikes → Blocks → Auto-defense → Damage
 
+
+
+

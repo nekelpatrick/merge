@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using ShieldWall.Visual;
+using ShieldWall.UI;
 
 namespace ShieldWall.Editor
 {
@@ -22,13 +24,12 @@ namespace ShieldWall.Editor
             ApplyCharacterMaterials();
             AdjustAtmosphereLighting();
             EnsureCombatFeedbackController();
-            SetupEnemyHealthDisplays();
             
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
             EditorSceneManager.SaveOpenScenes();
             
             Debug.Log("=== Visual Polish Complete ===");
-            Debug.Log("Next: Enter Play mode to test screen shake, blood VFX, enemy health displays, and visual improvements!");
+            Debug.Log("Next: Enter Play mode to test screen shake, blood VFX, enemy health displays (auto-created at runtime), and visual improvements!");
         }
         
         [MenuItem("Shield Wall Builder/Visual Polish/1. Apply Character Materials", false, 401)]
@@ -52,7 +53,7 @@ namespace ShieldWall.Editor
             int enemiesUpdated = 0;
             int playerUpdated = 0;
             
-            GameObject[] allObjects = Object.FindObjectsOfType<GameObject>();
+            GameObject[] allObjects = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
             
             foreach (GameObject go in allObjects)
             {
@@ -129,7 +130,7 @@ namespace ShieldWall.Editor
             
             Debug.Log("--- Setting Up Combat Feedback Controller ---");
             
-            var existing = Object.FindFirstObjectByType<ShieldWall.Visual.CombatFeedbackController>();
+            var existing = Object.FindFirstObjectByType<CombatFeedbackController>();
             if (existing != null)
             {
                 Debug.Log("✓ CombatFeedbackController already exists");
@@ -137,7 +138,7 @@ namespace ShieldWall.Editor
             }
             
             GameObject managerGO = new GameObject("CombatFeedbackController");
-            managerGO.AddComponent<ShieldWall.Visual.CombatFeedbackController>();
+            managerGO.AddComponent<CombatFeedbackController>();
             
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
             
@@ -154,7 +155,7 @@ namespace ShieldWall.Editor
             int enemiesFound = 0;
             int healthDisplaysAdded = 0;
             
-            GameObject[] allObjects = Object.FindObjectsOfType<GameObject>();
+            GameObject[] allObjects = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
             
             foreach (GameObject go in allObjects)
             {
@@ -162,7 +163,7 @@ namespace ShieldWall.Editor
                 {
                     enemiesFound++;
                     
-                    var existingDisplay = go.GetComponentInChildren<ShieldWall.UI.EnemyHealthDisplay>();
+                    var existingDisplay = go.GetComponentInChildren<EnemyHealthDisplay>();
                     if (existingDisplay != null)
                     {
                         continue;
@@ -194,7 +195,7 @@ namespace ShieldWall.Editor
                     text.color = Color.white;
                     text.alignment = TMPro.TextAlignmentOptions.Center;
                     
-                    var healthDisplay = healthDisplayGO.AddComponent<ShieldWall.UI.EnemyHealthDisplay>();
+                    var healthDisplay = healthDisplayGO.AddComponent<EnemyHealthDisplay>();
                     
                     SerializedObject so = new SerializedObject(healthDisplay);
                     so.FindProperty("_healthText").objectReferenceValue = text;
@@ -226,7 +227,7 @@ namespace ShieldWall.Editor
             int brothersWithMaterial = 0;
             int enemiesWithMaterial = 0;
             
-            GameObject[] allObjects = Object.FindObjectsOfType<GameObject>();
+            GameObject[] allObjects = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
             foreach (GameObject go in allObjects)
             {
                 MeshRenderer renderer = go.GetComponent<MeshRenderer>();

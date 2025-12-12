@@ -106,7 +106,7 @@ namespace ShieldWall.Visual
                 return potentialEnemies[Random.Range(0, potentialEnemies.Length)].transform.position;
             }
             
-            GameObject[] allObjects = Object.FindObjectsOfType<GameObject>();
+            GameObject[] allObjects = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
             foreach (GameObject go in allObjects)
             {
                 if (go.name.ToLower().Contains("enemy"))
@@ -120,7 +120,7 @@ namespace ShieldWall.Visual
         
         private Vector3 FindAttackTargetPosition(Attack attack)
         {
-            GameObject[] allObjects = Object.FindObjectsOfType<GameObject>();
+            GameObject[] allObjects = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
             
             string positionName = attack.Target.ToString().ToLower();
             

@@ -45,6 +45,14 @@ namespace ShieldWall.Visual
             {
                 _renderer.enabled = false;
             }
+            else if (distance > _lodDistance1)
+            {
+                _renderer.enabled = true;
+            }
+            else if (distance > _lodDistance0)
+            {
+                _renderer.enabled = true;
+            }
             else
             {
                 _renderer.enabled = true;

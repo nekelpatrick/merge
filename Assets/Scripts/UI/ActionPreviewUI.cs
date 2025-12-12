@@ -78,15 +78,19 @@ namespace ShieldWall.UI
 
             if (!hasActions) return;
 
-            EnsureItemCount(_currentAvailableActions.Count);
+            List<ActionSO> actionsToShow = _showOnlyAvailable 
+                ? _currentAvailableActions 
+                : _currentAvailableActions;
 
-            for (int i = 0; i < _currentAvailableActions.Count; i++)
+            EnsureItemCount(actionsToShow.Count);
+
+            for (int i = 0; i < actionsToShow.Count; i++)
             {
-                _previewItems[i].SetAction(_currentAvailableActions[i], true);
+                _previewItems[i].SetAction(actionsToShow[i], true);
                 _previewItems[i].gameObject.SetActive(true);
             }
 
-            for (int i = _currentAvailableActions.Count; i < _previewItems.Count; i++)
+            for (int i = actionsToShow.Count; i < _previewItems.Count; i++)
             {
                 _previewItems[i].gameObject.SetActive(false);
             }

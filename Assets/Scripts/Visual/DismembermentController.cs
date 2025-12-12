@@ -80,6 +80,7 @@ namespace ShieldWall.Visual
             
             Vector3 direction = (transform.position - Camera.main.transform.position).normalized;
             direction.y = 0.5f;
+            direction *= _severedLimbForce;
             
             var severedLimb = Instantiate(prefab, position, Random.rotation);
             

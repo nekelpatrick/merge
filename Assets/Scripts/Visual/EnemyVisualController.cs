@@ -2,11 +2,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using ShieldWall.Core;
 using ShieldWall.Data;
+using ShieldWall.UI;
 
 namespace ShieldWall.Visual
 {
     public class EnemyVisualController : MonoBehaviour
     {
+        [Header("Enemy Prefabs")]
+        [SerializeField] private GameObject _enemyThrallPrefab;
+        [SerializeField] private GameObject _enemyWarriorPrefab;
+        [SerializeField] private GameObject _enemyBerserkerPrefab;
+        [SerializeField] private GameObject _enemyArcherPrefab;
+        [SerializeField] private GameObject _enemySpearmanPrefab;
+        [SerializeField] private GameObject _enemyShieldBreakerPrefab;
+        [SerializeField] private GameObject _defaultEnemyPrefab;
+        
         [Header("Spawn Settings")]
         [SerializeField] private float _spawnDistanceZ = 7f;
         [SerializeField] private float _spreadX = 2f;
@@ -61,15 +71,90 @@ namespace ShieldWall.Visual
 
         private EnemyVisualInstance CreateEnemyVisual(EnemySO enemy, Vector3 position)
         {
-            GameObject visualGO = new GameObject($"Enemy_{enemy.enemyName}");
-            visualGO.transform.SetParent(transform);
-            visualGO.transform.localPosition = position;
+            GameObject prefabToUse = GetEnemyPrefab(enemy.enemyName);
+            
+            GameObject visualGO;
+            
+            if (prefabToUse != null)
+            {
+                visualGO = Instantiate(prefabToUse, transform);
+                visualGO.name = $"Enemy_{enemy.enemyName}";
+                visualGO.transform.localPosition = position;
+            }
+            else
+            {
+                visualGO = new GameObject($"Enemy_{enemy.enemyName}");
+                visualGO.transform.SetParent(transform);
+                visualGO.transform.localPosition = position;
+                visualGO.AddComponent<EnemyVisualInstance>();
+            }
 
-            var instance = visualGO.AddComponent<EnemyVisualInstance>();
+            var instance = visualGO.GetComponent<EnemyVisualInstance>();
+            if (instance == null)
+            {
+                instance = visualGO.AddComponent<EnemyVisualInstance>();
+            }
+            
             Color color = GetEnemyColor(enemy.enemyName);
             instance.Initialize(enemy, color, _bloodBurstPrefab);
 
+            var existingHealthDisplay = visualGO.GetComponentInChildren<EnemyHealthDisplay>();
+            if (existingHealthDisplay == null)
+            {
+                CreateHealthDisplayFor(visualGO);
+            }
+            else
+            {
+                existingHealthDisplay.SetEnemyVisual(instance);
+            }
+
             return instance;
+        }
+        
+        private GameObject GetEnemyPrefab(string enemyName)
+        {
+            string lowerName = enemyName.ToLower();
+            
+            if (lowerName.Contains("thrall")) return _enemyThrallPrefab;
+            if (lowerName.Contains("warrior")) return _enemyWarriorPrefab;
+            if (lowerName.Contains("berserker")) return _enemyBerserkerPrefab;
+            if (lowerName.Contains("archer")) return _enemyArcherPrefab;
+            if (lowerName.Contains("spearman")) return _enemySpearmanPrefab;
+            if (lowerName.Contains("shieldbreaker") || lowerName.Contains("shield breaker"))
+                return _enemyShieldBreakerPrefab;
+            
+            return _defaultEnemyPrefab;
+        }
+        
+        private void CreateHealthDisplayFor(GameObject enemyGO)
+        {
+            GameObject healthDisplayGO = new GameObject("HealthDisplay");
+            healthDisplayGO.transform.SetParent(enemyGO.transform, false);
+            healthDisplayGO.transform.localPosition = new Vector3(0, 1.5f, 0);
+            
+            var canvas = healthDisplayGO.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.WorldSpace;
+            
+            var canvasRect = canvas.GetComponent<RectTransform>();
+            canvasRect.sizeDelta = new Vector2(200, 50);
+            canvasRect.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+            
+            GameObject textGO = new GameObject("HealthText");
+            textGO.transform.SetParent(healthDisplayGO.transform, false);
+            
+            var textRect = textGO.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.sizeDelta = Vector2.zero;
+            
+            var text = textGO.AddComponent<TMPro.TextMeshProUGUI>();
+            text.text = "5/5 HP";
+            text.fontSize = 36;
+            text.fontStyle = TMPro.FontStyles.Bold;
+            text.color = Color.white;
+            text.alignment = TMPro.TextAlignmentOptions.Center;
+            
+            var healthDisplay = healthDisplayGO.AddComponent<EnemyHealthDisplay>();
         }
 
         private Color GetEnemyColor(string enemyName)

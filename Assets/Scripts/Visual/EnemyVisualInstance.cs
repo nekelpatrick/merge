@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using ShieldWall.Data;
+using ShieldWall.Combat;
 
 namespace ShieldWall.Visual
 {
@@ -13,6 +14,7 @@ namespace ShieldWall.Visual
         private const float HIT_FLASH_DURATION = 0.1f;
 
         public EnemySO EnemyData { get; private set; }
+        public Enemy RuntimeEnemy { get; private set; }
 
         private Transform _body;
         private Transform _head;
@@ -28,6 +30,7 @@ namespace ShieldWall.Visual
         public void Initialize(EnemySO enemy, Color color, BloodBurstVFX bloodBurstPrefab)
         {
             EnemyData = enemy;
+            RuntimeEnemy = new Enemy(enemy);
             _baseColor = color;
             _bloodBurstPrefab = bloodBurstPrefab;
 

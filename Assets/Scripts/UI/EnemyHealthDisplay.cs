@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using ShieldWall.Visual;
 using ShieldWall.Combat;
 
 namespace ShieldWall.UI
@@ -12,7 +13,7 @@ namespace ShieldWall.UI
     public class EnemyHealthDisplay : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private Enemy _enemy;
+        [SerializeField] private EnemyVisualInstance _enemyVisual;
         [SerializeField] private TextMeshProUGUI _healthText;
         [SerializeField] private Canvas _canvas;
         
@@ -65,10 +66,14 @@ namespace ShieldWall.UI
         
         private void Start()
         {
-            if (_enemy == null)
+            if (_enemyVisual == null)
             {
-                _enemy = GetComponentInParent<Enemy>();
+                _enemyVisual = GetComponentInParent<EnemyVisualInstance>();
             }
+            
+            // #region agent log
+            try { System.IO.File.AppendAllText(@"c:\Users\PatrickLocal\merge\.cursor\debug.log", $"{{\"location\":\"EnemyHealthDisplay.cs:Start\",\"message\":\"EnemyHealthDisplay started\",\"data\":{{\"hasEnemyVisual\":{(_enemyVisual!=null).ToString().ToLower()},\"enemyName\":\"{_enemyVisual?.EnemyData?.enemyName}\"}},\"timestamp\":{System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()},\"sessionId\":\"debug-session\",\"hypothesisId\":\"A\"}}\n"); } catch {}
+            // #endregion
             
             UpdateHealthDisplay();
         }
@@ -90,12 +95,22 @@ namespace ShieldWall.UI
         
         private void UpdateHealthDisplay()
         {
-            if (_enemy == null || _healthText == null) return;
+            if (_enemyVisual == null || _enemyVisual.RuntimeEnemy == null || _healthText == null)
+            {
+                // #region agent log
+                try { System.IO.File.AppendAllText(@"c:\Users\PatrickLocal\merge\.cursor\debug.log", $"{{\"location\":\"EnemyHealthDisplay.cs:UpdateHealthDisplay\",\"message\":\"Missing references\",\"data\":{{\"hasEnemyVisual\":{(_enemyVisual!=null).ToString().ToLower()},\"hasRuntimeEnemy\":{(_enemyVisual?.RuntimeEnemy!=null).ToString().ToLower()},\"hasHealthText\":{(_healthText!=null).ToString().ToLower()}}},\"timestamp\":{System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()},\"sessionId\":\"debug-session\",\"hypothesisId\":\"B\"}}\n"); } catch {}
+                // #endregion
+                return;
+            }
             
-            int currentHealth = _enemy.CurrentHealth;
-            int maxHealth = _enemy.MaxHealth;
+            int currentHealth = _enemyVisual.RuntimeEnemy.CurrentHealth;
+            int maxHealth = _enemyVisual.RuntimeEnemy.Data.health;
             
             _healthText.text = $"{currentHealth}/{maxHealth} HP";
+            
+            // #region agent log
+            try { System.IO.File.AppendAllText(@"c:\Users\PatrickLocal\merge\.cursor\debug.log", $"{{\"location\":\"EnemyHealthDisplay.cs:UpdateHealthDisplay\",\"message\":\"Health updated\",\"data\":{{\"currentHealth\":{currentHealth},\"maxHealth\":{maxHealth},\"displayText\":\"{_healthText.text}\"}},\"timestamp\":{System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()},\"sessionId\":\"debug-session\",\"hypothesisId\":\"C\"}}\n"); } catch {}
+            // #endregion
             
             float healthPercent = (float)currentHealth / maxHealth;
             
@@ -118,9 +133,9 @@ namespace ShieldWall.UI
             }
         }
         
-        public void SetEnemy(Enemy enemy)
+        public void SetEnemyVisual(EnemyVisualInstance enemyVisual)
         {
-            _enemy = enemy;
+            _enemyVisual = enemyVisual;
             UpdateHealthDisplay();
         }
         
