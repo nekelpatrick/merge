@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a0964817b3311e46a59dd32ff6636c2, type: 3}
+  m_Name: QualityProfile_High
+  m_EditorClassIdentifier: 
+  profileName: High
+  description: Maximum quality for high-end devices
+  targetPlatform: 11
+  renderScale: 1.0
+  msaaQuality: 4
+  enableHDR: 0
+  enableShadows: 1
+  shadowResolution: 3
+  shadowDistance: 30
+  enablePostProcessing: 1
+  enableBloom: 1
+  enableVignette: 1
+  enableChromaticAberration: 1
+  enableColorGrading: 1
+  particleMultiplier: 1.0
+  maxParticlesPerEffect: 75
+  enableBloodVFX: 1
+  enableDismemberment: 1
+  targetFrameRate: 60
+  enableVSync: 0
+  pixelLightCount: 2
+  forceMono: 0
+  audioQualityScale: 1.0
