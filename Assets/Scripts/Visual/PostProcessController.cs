@@ -45,19 +45,49 @@ namespace ShieldWall.Visual
                 if (_colorAdjustments != null)
                     _baseSaturation = _colorAdjustments.saturation.value;
             }
+            
+            // Check mobile settings
+            CheckMobileSettings();
         }
 
         private void OnEnable()
         {
             GameEvents.OnPlayerWounded += HandlePlayerWounded;
             GameEvents.OnEnemyKilled += HandleEnemyKilled;
+            GameEvents.OnMobileSettingChanged += HandleMobileSettingChanged;
         }
 
         private void OnDisable()
         {
             GameEvents.OnPlayerWounded -= HandlePlayerWounded;
             GameEvents.OnEnemyKilled -= HandleEnemyKilled;
+            GameEvents.OnMobileSettingChanged -= HandleMobileSettingChanged;
             ResetEffects();
+        }
+
+        private void CheckMobileSettings()
+        {
+#if UNITY_ANDROID || UNITY_IOS
+            // Check if post-processing should be disabled via mobile settings
+            bool disablePost = PlayerPrefs.GetInt("MobileDisablePost", 0) == 1;
+            if (disablePost && _volume != null)
+            {
+                _volume.enabled = false;
+                Debug.Log("[PostProcess] Post-processing disabled for mobile performance");
+            }
+#endif
+        }
+
+        private void HandleMobileSettingChanged(string settingName, bool value)
+        {
+            if (settingName == "DisablePost")
+            {
+                if (_volume != null)
+                {
+                    _volume.enabled = !value;
+                    Debug.Log($"[PostProcess] Post-processing {(value ? "disabled" : "enabled")}");
+                }
+            }
         }
 
         private void HandlePlayerWounded(int damage)

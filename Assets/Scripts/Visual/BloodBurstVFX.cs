@@ -1,9 +1,15 @@
+using System;
+using System.IO;
 using UnityEngine;
 
 namespace ShieldWall.Visual
 {
     public class BloodBurstVFX : MonoBehaviour
     {
+        private const string DebugLogPath = @"c:\Users\PatrickLocal\merge\.cursor\debug.log";
+        private const string DebugSessionId = "debug-session";
+        private const string DebugRunId = "run1";
+
         private const int MIN_PARTICLES = 50;
         private const int MAX_PARTICLES = 100;
         private const float CONE_ANGLE = 45f;
@@ -21,6 +27,18 @@ namespace ShieldWall.Visual
         private void Awake()
         {
             _particleSystem = GetComponent<ParticleSystem>();
+
+            #region agent log
+            try
+            {
+                File.AppendAllText(
+                    DebugLogPath,
+                    $"{{\"sessionId\":\"{DebugSessionId}\",\"runId\":\"{DebugRunId}\",\"hypothesisId\":\"H3\",\"location\":\"BloodBurstVFX.cs:Awake\",\"message\":\"Awake\",\"data\":{{\"hadParticleSystem\":{(_particleSystem != null ? "true" : "false")},\"isPlaying\":{(_particleSystem != null && _particleSystem.isPlaying ? "true" : "false")},\"playOnAwake\":{(_particleSystem != null && _particleSystem.main.playOnAwake ? "true" : "false")}}},\"timestamp\":{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}}}\n"
+                );
+            }
+            catch { }
+            #endregion
+
             if (_particleSystem == null)
             {
                 _particleSystem = gameObject.AddComponent<ParticleSystem>();
@@ -30,6 +48,24 @@ namespace ShieldWall.Visual
 
         private void ConfigureParticleSystem()
         {
+            // Unity can auto-play a freshly added ParticleSystem (default playOnAwake=true) immediately on AddComponent,
+            // which makes setting duration/etc emit warnings. Stop/clear before applying configuration.
+            if (_particleSystem != null && _particleSystem.isPlaying)
+            {
+                _particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+
+            #region agent log
+            try
+            {
+                File.AppendAllText(
+                    DebugLogPath,
+                    $"{{\"sessionId\":\"{DebugSessionId}\",\"runId\":\"{DebugRunId}\",\"hypothesisId\":\"H3\",\"location\":\"BloodBurstVFX.cs:ConfigureParticleSystem\",\"message\":\"ConfigureParticleSystem begin\",\"data\":{{\"isPlaying\":{(_particleSystem != null && _particleSystem.isPlaying ? "true" : "false")},\"playOnAwake\":{(_particleSystem != null && _particleSystem.main.playOnAwake ? "true" : "false")},\"duration\":{(_particleSystem != null ? _particleSystem.main.duration : -1f)}}},\"timestamp\":{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}}}\n"
+                );
+            }
+            catch { }
+            #endregion
+
             var main = _particleSystem.main;
             main.duration = MAX_LIFETIME;
             main.loop = false;

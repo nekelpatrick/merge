@@ -1,4 +1,8 @@
+using System;
+using System.IO;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Object = UnityEngine.Object;
 using ShieldWall.Core;
 using ShieldWall.Data;
 
@@ -10,6 +14,10 @@ namespace ShieldWall.Visual
     /// </summary>
     public class CombatFeedbackController : MonoBehaviour
     {
+        private const string DebugLogPath = @"c:\Users\PatrickLocal\merge\.cursor\debug.log";
+        private const string DebugSessionId = "debug-session";
+        private const string DebugRunId = "run1";
+
         [Header("Blood VFX")]
         [SerializeField] private BloodBurstVFX _bloodBurstPrefab;
         [SerializeField] private GameObject[] _bloodDecalPrefabs;
@@ -18,6 +26,12 @@ namespace ShieldWall.Visual
         [Header("Hit VFX")]
         [SerializeField] private bool _enableBloodOnAttackLanded = true;
         [SerializeField] private float _bloodIntensityMultiplier = 1f;
+
+        private static string Escape(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return "";
+            return value.Replace("\\", "\\\\").Replace("\"", "\\\"");
+        }
         
         private void OnEnable()
         {
@@ -39,6 +53,17 @@ namespace ShieldWall.Visual
         
         private void HandleEnemyKilled(EnemySO enemy)
         {
+            #region agent log
+            try
+            {
+                File.AppendAllText(
+                    DebugLogPath,
+                    $"{{\"sessionId\":\"{DebugSessionId}\",\"runId\":\"{DebugRunId}\",\"hypothesisId\":\"H1\",\"location\":\"CombatFeedbackController.cs:HandleEnemyKilled\",\"message\":\"OnEnemyKilled\",\"data\":{{\"enemyName\":\"{Escape(enemy != null ? enemy.name : "null")}\",\"enemyInstanceId\":{(enemy != null ? enemy.GetInstanceID() : 0)}}},\"timestamp\":{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}}}\n"
+                );
+            }
+            catch { }
+            #endregion
+
             Vector3 enemyPosition = FindEnemyPosition(enemy);
             
             if (enemyPosition != Vector3.zero)
@@ -62,6 +87,17 @@ namespace ShieldWall.Visual
         {
             if (_bloodBurstPrefab == null)
             {
+                #region agent log
+                try
+                {
+                    File.AppendAllText(
+                        DebugLogPath,
+                        $"{{\"sessionId\":\"{DebugSessionId}\",\"runId\":\"{DebugRunId}\",\"hypothesisId\":\"H5\",\"location\":\"CombatFeedbackController.cs:SpawnBloodBurst\",\"message\":\"UsingRuntimeGeneratedBloodBurst\",\"data\":{{\"x\":{position.x},\"y\":{position.y},\"z\":{position.z},\"scale\":{scale},\"intensityMult\":{_bloodIntensityMultiplier}}},\"timestamp\":{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}}}\n"
+                    );
+                }
+                catch { }
+                #endregion
+
                 GameObject bloodVFXGO = new GameObject("BloodBurst");
                 bloodVFXGO.transform.position = position;
                 BloodBurstVFX bloodVFX = bloodVFXGO.AddComponent<BloodBurstVFX>();
@@ -100,7 +136,39 @@ namespace ShieldWall.Visual
         
         private Vector3 FindEnemyPosition(EnemySO enemy)
         {
-            GameObject[] potentialEnemies = GameObject.FindGameObjectsWithTag("Enemy");
+            GameObject[] potentialEnemies;
+            try
+            {
+                potentialEnemies = GameObject.FindGameObjectsWithTag("Enemy");
+            }
+            catch (Exception ex)
+            {
+                #region agent log
+                try
+                {
+                    File.AppendAllText(
+                        DebugLogPath,
+                        $"{{\"sessionId\":\"{DebugSessionId}\",\"runId\":\"{DebugRunId}\",\"hypothesisId\":\"H1\",\"location\":\"CombatFeedbackController.cs:FindEnemyPosition\",\"message\":\"FindGameObjectsWithTag threw\",\"data\":{{\"tag\":\"Enemy\",\"enemyName\":\"{Escape(enemy != null ? enemy.name : "null")}\",\"enemyInstanceId\":{(enemy != null ? enemy.GetInstanceID() : 0)},\"exceptionType\":\"{Escape(ex.GetType().Name)}\",\"exceptionMessage\":\"{Escape(ex.Message)}\"}},\"timestamp\":{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}}}\n"
+                    );
+                }
+                catch { }
+                #endregion
+
+                // Tag may not exist in project settings. Fall back to name-based search instead of crashing.
+                potentialEnemies = Array.Empty<GameObject>();
+            }
+
+            #region agent log
+            try
+            {
+                File.AppendAllText(
+                    DebugLogPath,
+                    $"{{\"sessionId\":\"{DebugSessionId}\",\"runId\":\"{DebugRunId}\",\"hypothesisId\":\"H2\",\"location\":\"CombatFeedbackController.cs:FindEnemyPosition\",\"message\":\"FindGameObjectsWithTag ok\",\"data\":{{\"tag\":\"Enemy\",\"count\":{(potentialEnemies != null ? potentialEnemies.Length : -1)}}},\"timestamp\":{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}}}\n"
+                );
+            }
+            catch { }
+            #endregion
+
             if (potentialEnemies.Length > 0)
             {
                 return potentialEnemies[Random.Range(0, potentialEnemies.Length)].transform.position;

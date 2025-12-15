@@ -29,6 +29,12 @@ namespace ShieldWall.Core
         public static event Action OnWaveCleared;
         public static event Action<bool> OnBattleEnded;
 
+        // Mobile platform events
+        public static event Action OnPlatformSettingsApplied;
+        public static event Action OnApplicationPauseRequested;
+        public static event Action OnApplicationResumeRequested;
+        public static event Action<string, bool> OnMobileSettingChanged;
+
         public static void RaiseDiceRolled(RuneDie[] dice) => OnDiceRolled?.Invoke(dice);
         public static void RaiseDieLockToggled(int index, bool isLocked) => OnDieLockToggled?.Invoke(index, isLocked);
         public static void RaiseAvailableActionsChanged(List<ActionSO> actions) => OnAvailableActionsChanged?.Invoke(actions);
@@ -50,6 +56,11 @@ namespace ShieldWall.Core
         public static void RaiseWaveCleared() => OnWaveCleared?.Invoke();
         public static void RaiseBattleEnded(bool victory) => OnBattleEnded?.Invoke(victory);
 
+        public static void RaisePlatformSettingsApplied() => OnPlatformSettingsApplied?.Invoke();
+        public static void RaiseApplicationPauseRequested() => OnApplicationPauseRequested?.Invoke();
+        public static void RaiseApplicationResumeRequested() => OnApplicationResumeRequested?.Invoke();
+        public static void RaiseMobileSettingChanged(string settingName, bool value) => OnMobileSettingChanged?.Invoke(settingName, value);
+
         public static void ClearAllListeners()
         {
             OnDiceRolled = null;
@@ -68,6 +79,10 @@ namespace ShieldWall.Core
             OnWaveStarted = null;
             OnWaveCleared = null;
             OnBattleEnded = null;
+            OnPlatformSettingsApplied = null;
+            OnApplicationPauseRequested = null;
+            OnApplicationResumeRequested = null;
+            OnMobileSettingChanged = null;
         }
     }
 

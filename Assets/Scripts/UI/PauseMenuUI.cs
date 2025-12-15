@@ -13,6 +13,18 @@ namespace ShieldWall.UI
 
         private bool _isPaused;
 
+        void OnEnable()
+        {
+            GameEvents.OnApplicationPauseRequested += HandlePauseRequested;
+            GameEvents.OnApplicationResumeRequested += HandleResumeRequested;
+        }
+
+        void OnDisable()
+        {
+            GameEvents.OnApplicationPauseRequested -= HandlePauseRequested;
+            GameEvents.OnApplicationResumeRequested -= HandleResumeRequested;
+        }
+
         void Start()
         {
             if (_pausePanel != null)
@@ -63,6 +75,22 @@ namespace ShieldWall.UI
         {
             Time.timeScale = 1f;
             SceneLoader.Instance?.LoadMainMenu();
+        }
+
+        private void HandlePauseRequested()
+        {
+            if (!_isPaused)
+            {
+                Pause();
+            }
+        }
+
+        private void HandleResumeRequested()
+        {
+            if (_isPaused)
+            {
+                Resume();
+            }
         }
 
         void OnDestroy()
