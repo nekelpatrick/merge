@@ -89,28 +89,29 @@ For **all** Canvas components in MainMenu and Battle:
 2. **Find CanvasScaler component**
 3. **Configure**:
    - `UI Scale Mode`: Scale With Screen Size
-   - `Reference Resolution`: `1920 x 1080` (16:9 landscape standard)
+   - `Reference Resolution`: `1080 x 1920` (9:16 portrait standard)
    - `Screen Match Mode`: Match Width Or Height
    - `Match`: `0.5` (balanced between width and height)
    - `Reference Pixels Per Unit`: `100`
 
 ### Why These Settings?
 
-- **1920x1080 reference**: Common mobile resolution, scales well across devices
-- **Match 0.5**: Ensures UI scales proportionally on various aspect ratios (16:9, 18:9, 19.5:9)
+- **1080x1920 reference**: Common portrait mobile resolution, scales well across devices
+- **Match 0.5**: Ensures UI scales proportionally on various aspect ratios (16:9, 18:9, 19.5:9, 21:9)
 - **Scale With Screen Size**: Maintains relative sizes across screen sizes
 
 ### Testing Different Aspect Ratios
 
 Use Device Simulator to test:
-- 16:9 (standard tablets, older phones)
+- 16:9 (standard portrait, older phones)
 - 18:9 (modern mid-range phones)
 - 19.5:9 (flagship phones with tall screens)
+- 21:9 (extra tall displays with notches)
 
 Verify:
 - Buttons remain readable (not too small)
 - Text is legible
-- Touch targets meet minimum size (80x80 pixels)
+- Touch targets meet minimum size (100x100 pixels for portrait)
 
 ---
 

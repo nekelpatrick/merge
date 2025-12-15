@@ -34,35 +34,6 @@ namespace ShieldWall.Dice
             return availableActions;
         }
 
-        public static List<ActionSO> ResolveGreedy(RuneType[] lockedDice, ActionSO[] allActions)
-        {
-            if (lockedDice == null || lockedDice.Length == 0 || allActions == null)
-            {
-                return new List<ActionSO>();
-            }
-
-            var runeCounts = CountRunes(lockedDice);
-            var selectedActions = new List<ActionSO>();
-            
-            var sortedActions = allActions
-                .Where(a => a != null && a.requiredRunes != null)
-                .OrderByDescending(a => a.requiredRunes.Length)
-                .ToList();
-
-            var remainingRunes = new Dictionary<RuneType, int>(runeCounts);
-
-            foreach (var action in sortedActions)
-            {
-                while (CanAffordAction(action, remainingRunes))
-                {
-                    selectedActions.Add(action);
-                    SpendRunes(action, remainingRunes);
-                }
-            }
-
-            return selectedActions;
-        }
-
         public static bool CanAffordAction(ActionSO action, Dictionary<RuneType, int> availableRunes)
         {
             if (action == null || action.requiredRunes == null) return false;

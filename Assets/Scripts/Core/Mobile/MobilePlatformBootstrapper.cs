@@ -55,6 +55,13 @@ namespace ShieldWall.Mobile
                 Screen.sleepTimeout = _sleepTimeout;
             }
             
+            // Enforce portrait orientation at runtime (portrait-only mobile game)
+            Screen.orientation = ScreenOrientation.Portrait;
+            Screen.autorotateToPortrait = true;
+            Screen.autorotateToPortraitUpsideDown = true;
+            Screen.autorotateToLandscapeLeft = false;
+            Screen.autorotateToLandscapeRight = false;
+            
             if (_logSettings)
             {
                 LogPlatformInfo();

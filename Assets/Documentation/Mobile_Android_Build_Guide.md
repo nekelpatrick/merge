@@ -17,12 +17,12 @@ Navigate to **Edit → Project Settings → Player → Android**
 - **Adaptive Icon**: Provide launcher icons (currently using defaults)
 
 #### 3. Resolution and Presentation
-- **Default Orientation**: `Landscape Left`
+- **Default Orientation**: `Portrait`
 - **Allowed Orientations for Auto Rotation**:
-  - Portrait: ❌ Disabled
-  - Portrait Upside Down: ❌ Disabled
-  - Landscape Right: ✅ Enabled
-  - Landscape Left: ✅ Enabled
+  - Portrait: ✅ Enabled
+  - Portrait Upside Down: ✅ Enabled
+  - Landscape Right: ❌ Disabled
+  - Landscape Left: ❌ Disabled
 - **32-bit Display Buffer**: ✅ Enabled (better color on OLED screens)
 - **Render Outside Safe Area**: ❌ Disabled (we'll handle safe area manually)
 
@@ -133,7 +133,7 @@ Create or adjust mobile-specific URP settings:
    - [ ] Can select action
    - [ ] Can complete one turn
    - [ ] Can pause and resume
-   - [ ] Orientation locks to landscape
+   - [ ] Orientation locks to portrait
 
 ### Common Issues & Fixes
 

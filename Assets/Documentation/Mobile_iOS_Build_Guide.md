@@ -18,14 +18,14 @@ Navigate to **Edit → Project Settings → Player → iOS**
   - Required: 1024x1024 (App Store), 180x180 (iPhone), 167x167 (iPad Pro)
 
 #### 3. Resolution and Presentation
-- **Default Orientation**: `Landscape Left`
+- **Default Orientation**: `Portrait`
 - **Allowed Orientations for Auto Rotation**:
-  - Portrait: ❌ Disabled
-  - Portrait Upside Down: ❌ Disabled
-  - Landscape Right: ✅ Enabled
-  - Landscape Left: ✅ Enabled
+  - Portrait: ✅ Enabled
+  - Portrait Upside Down: ✅ Enabled
+  - Landscape Right: ❌ Disabled
+  - Landscape Left: ❌ Disabled
 - **Requires Fullscreen**: ✅ Enabled (opt out of home indicator auto-hide)
-- **Status Bar Hidden**: ✅ Enabled (landscape game, no status bar needed)
+- **Status Bar Hidden**: ✅ Enabled (portrait game, no status bar needed)
 - **Defer System Gestures on Edges**: `None` (allow standard iOS gestures)
 - **Hide Home Button**: ❌ Disabled (respect user control)
 
@@ -133,7 +133,7 @@ Navigate to **Edit → Project Settings → Player → iOS**
 - [ ] Can select action
 - [ ] Can complete one turn
 - [ ] Can pause and resume
-- [ ] Orientation locks to landscape
+- [ ] Orientation locks to portrait
 - [ ] Home button/swipe works (app backgrounds cleanly)
 - [ ] Returning from background resumes correctly
 

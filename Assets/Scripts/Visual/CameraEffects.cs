@@ -16,6 +16,11 @@ namespace ShieldWall.Visual
         [SerializeField] private float _punchDistance = 0.1f;
         [SerializeField] private float _punchDuration = 0.15f;
         [SerializeField] private float _punchFOVAmount = 5f;
+        
+        [Header("Portrait Mode")]
+        [SerializeField] private bool _usePortraitFOV = true;
+        [SerializeField] private float _portraitFOV = 55f;
+        [SerializeField] private float _landscapeFOV = 60f;
 
         [Header("References")]
         [SerializeField] private Camera _camera;
@@ -33,7 +38,17 @@ namespace ShieldWall.Visual
             if (_camera != null)
             {
                 _originalPosition = _camera.transform.localPosition;
-                _originalFOV = _camera.fieldOfView;
+                
+                // Set FOV based on orientation mode
+                if (_usePortraitFOV)
+                {
+                    _originalFOV = _portraitFOV;
+                    _camera.fieldOfView = _portraitFOV;
+                }
+                else
+                {
+                    _originalFOV = _camera.fieldOfView;
+                }
             }
         }
 
